@@ -84,7 +84,7 @@ func (pthi *PTHICommand) GetUUID() (uuid string, err error) {
 func (pthi *PTHICommand) GetControlMode() (state int, err error) {
 	commandSize := (uint32)(12)
 	command := GetControlModeRequest{
-		Header: CreateRequestHeader(GET_CONTROL_MODE_REQUEST), //make request
+		Header: CreateRequestHeader(GET_CONTROL_MODE_REQUEST),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
