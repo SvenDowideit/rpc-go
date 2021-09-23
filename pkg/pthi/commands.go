@@ -141,3 +141,5 @@ func (pthi *PTHICommand) GetDNSSuffix() (suffix string, err error) {
 
 	return "", nil
 }
+
+
