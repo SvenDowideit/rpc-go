@@ -36,6 +36,7 @@ type GetUUIDRequest struct {
 func TestHeciInit(t *testing.T) {
 	h := Heci{}
 	err := h.Init()
+	defer h.Close()
 	assert.NoError(t, err)
 	assert.Equal(t, h.bufferSize, uint32(5120))
 }
@@ -49,6 +50,7 @@ func TestGetBufferSize(t *testing.T) {
 func TestSendMessage(t *testing.T) {
 	h := Heci{}
 	err := h.Init()
+	defer h.Close()
 	assert.NoError(t, err)
 	commandSize := (uint32)(12) //(uint32)(unsafe.Sizeof(GetUUIDRequest{}))
 	command := GetUUIDRequest{
@@ -73,6 +75,7 @@ func TestSendMessage(t *testing.T) {
 func TestReceiveMessage(t *testing.T) {
 	h := Heci{}
 	err := h.Init()
+	defer h.Close()
 	assert.NoError(t, err)
 	// send a message so we can receieve it
 	commandSize := (uint32)(12) //(uint32)(unsafe.Sizeof(GetUUIDRequest{}))
@@ -97,9 +100,9 @@ func TestReceiveMessage(t *testing.T) {
 
 	bufferSize := uint32(5120)
 	readBuffer := make([]byte, bufferSize)
-	bytesRead, _, err := h.ReceiveMessage(readBuffer, &bufferSize)
+	bytesRead, err := h.ReceiveMessage(readBuffer, &bufferSize)
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
 	assert.Positive(t, bytesRead)
 
 }

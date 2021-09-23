@@ -40,23 +40,24 @@ func TestSend(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestListen(t *testing.T) {
-	server, client := net.Pipe()
-	defer server.Close()
+// func TestListen(t *testing.T) {
+// 	server, client := net.Pipe()
+// 	defer server.Close()
 
-	lms := LMSConnection{
-		Connection: client,
-	}
-	data := make(chan []byte)
-	errCh := make(chan error)
+// 	lms := LMSConnection{
+// 		Connection: client,
+// 	}
+// 	data := make(chan []byte)
+// 	errCh := make(chan error)
 
-	//	read := make([]byte, 4096)
+// 	//	read := make([]byte, 4096)
 
-	defer lms.Close() // should close client pipe
-	go func(ch chan []byte, eCh chan error) {
-		lms.Listen(ch, eCh)
+// 	defer lms.Close() // should close client pipe
+// 	go func(ch chan []byte, eCh chan error) {
+// 		lms.Listen(ch, eCh)
 
-	}(data, errCh)
-	_, err := server.Write([]byte("data"))
-	assert.NoError(t, err)
-}
+// 	}(data, errCh)
+// 	_, err := server.Write([]byte("data"))
+// 	assert.NoError(t, err)
+// }
+

@@ -53,6 +53,12 @@ type CodeVersions struct {
 	Versions      [50]AMTVersionType //[VERSIONS_NUMBER]
 }
 
+// AMTANSIString ...
+type AMTANSIString struct {
+	Length uint16
+	Buffer [1000]C.char
+}
+
 // InterfaceSettings ...
 type InterfaceSettings struct {
 	IsEnabled   bool
@@ -77,7 +83,7 @@ type CCertHashEntry struct {
 	HashAlgorithm   uint8
 	IsActive        uint32
 	IsDefault       uint32
-	Name            pthi.AMTANSIString
+	Name            AMTANSIString
 }
 
 // CertHashEntry is the GO struct for holding Cert Hash Entries
@@ -268,7 +274,8 @@ func (amt Command) GetDNSSuffix() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	dnsSuffix := pthi.AMTANSIString{}
+  
+	dnsSuffix := AMTANSIString{}
 	packedDNSSuffix := C.struct__AMT_ANSI_STRING{}
 	status := C.pthi_GetDnsSuffix(&packedDNSSuffix)
 	if status == 0 {
@@ -361,7 +368,8 @@ func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
 	if err != nil {
 		return remoteAccessStatus, err
 	}
-	mpsHostname := pthi.AMTANSIString{}
+
+	mpsHostname := AMTANSIString{}
 	packedRAS := C.struct__REMOTE_ACCESS_STATUS{}
 	status := C.pthi_GetRemoteAccessConnectionStatus(&packedRAS)
 	if status == 0 {

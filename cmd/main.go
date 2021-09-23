@@ -43,7 +43,8 @@ func main() {
 	//try to connect to an existing LMS instance
 	log.Trace("Seeing if existing LMS is already running....")
 	lms := lms.LMSConnection{}
-	err = lms.Connect(utils.LMSAddress, utils.LMSAddress)
+	err = lms.Connect(utils.LMSAddress, utils.LMSPort)
+
 	amt := amt.Command{}
 	if err != nil {
 		log.Trace("nope!\n")
