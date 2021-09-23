@@ -110,10 +110,15 @@ type AMT interface {
 	GetControlModeV2() (int, error)
 	GetOSDNSSuffix() (string, error)
 	GetDNSSuffix() (string, error)
+	GetDNSSuffixV2() (string, error)
 	GetCertificateHashes() ([]CertHashEntry, error)
+	GetCertificateHashesV2() ([]CertHashEntry, error)
 	GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
+	GetRemoteAccessConnectionStatusV2() (RemoteAccessStatus, error)
 	GetLANInterfaceSettings(useWireless bool) (InterfaceSettings, error)
+	GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSettings, error)
 	GetLocalSystemAccount() (LocalSystemAccount, error)
+	GetLocalSystemAccountV2() (LocalSystemAccount, error)
 	InitiateLMS()
 }
 type Command struct {
@@ -360,6 +365,40 @@ func (amt Command) GetCertificateHashes() ([]CertHashEntry, error) {
 	return hashEntries, errors.New("unable to retrieve certificate hashes")
 }
 
+func GetCertificateHashesV2() (CertHashEntry, error) {
+	pthi := pthi.NewPTHICommand()
+	defer pthi.Close()
+	result, err := pthi.GetCertificateHashes()
+	returnable := CertHashEntry{} 
+	if err != nil {
+		return returnable, err
+	}
+
+	hashString := ""
+	for i := 0; i < len(result.CertificateHash); i++ {
+		hashString = hashString + fmt.Sprintf("%02x", int(result.CertificateHash[i]))
+	}
+
+	hashName := ""
+	for i := 0; i < int(result.Name.Length); i++ {
+		hashName = hashName + string(result.Name.Buffer[i])
+	}
+
+	
+	returnable.Hash = hashString
+	returnable.Name = hashName
+
+	return returnable, nil
+}
+
+func B2S(bs []uint8) string {
+    b := make([]byte, len(bs))
+    for i, v := range bs {
+        b[i] = byte(v)
+    }
+    return string(b)
+}
+
 // GetRemoteAccessConnectionStatus ...
 func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error) {
 	remoteAccessStatus := RemoteAccessStatus{}
@@ -391,6 +430,17 @@ func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
 	}
 	return remoteAccessStatus, errors.New("unable to retrieve remote access connection status")
 }
+
+// func GetRemoteAccessConnectionStatusV2() (RemoteAccessStatus, error) {
+// 	pthi := pthi.NewPTHICommand()
+// 	defer pthi.Close()
+// 	result, err := pthi.GetRemoteAccessConnectionStatus()
+// 	if err != nil {
+// 		//return nil, err
+// 	}
+
+// 	return result, nil
+// }
 
 // GetLANInterfaceSettings ...
 func (amt Command) GetLANInterfaceSettings(useWireless bool) (InterfaceSettings, error) {
@@ -445,6 +495,17 @@ func (amt Command) GetLANInterfaceSettings(useWireless bool) (InterfaceSettings,
 	return interfaceSettings, nil
 }
 
+// func GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSettings, error) {
+// 	pthi := pthi.NewPTHICommand()
+// 	defer pthi.Close()
+// 	result, err := pthi.GetLANInterfaceSettings()
+// 	if err != nil {
+// 		//return nil, err
+// 	}
+
+// 	return result, nil
+// }
+
 // GetLocalSystemAccount ...
 func (amt Command) GetLocalSystemAccount() (LocalSystemAccount, error) {
 	lsa := LocalSystemAccount{}
@@ -467,6 +528,17 @@ func (amt Command) GetLocalSystemAccount() (LocalSystemAccount, error) {
 	return lsa, nil
 
 }
+
+// func GetLocalSystemAccountV2() (LocalSystemAccount, error) {
+// 	pthi := pthi.NewPTHICommand()
+// 	defer pthi.Close()
+// 	result, err := pthi.GetLocalSystemAccount()
+// 	if err != nil {
+// 		//return nil, err
+// 	}
+
+// 	return result, nil
+// }
 
 // InitiateLMS ...
 func (amt Command) InitiateLMS() {

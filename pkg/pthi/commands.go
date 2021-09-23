@@ -119,7 +119,7 @@ func readHeaderResponse(header *bytes.Buffer) ResponseMessageHeader {
 func (pthi *PTHICommand) GetDNSSuffix() (suffix string, err error) {
 	commandSize := (uint32)(12)
 	command := GetPKIFQDNSuffixRequest{
-		Header: CreateRequestHeader(GET_PKI_FQDN_SUFFIX_REQUEST), //make request
+		Header: CreateRequestHeader(GET_PKI_FQDN_SUFFIX_REQUEST),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
@@ -142,4 +142,90 @@ func (pthi *PTHICommand) GetDNSSuffix() (suffix string, err error) {
 	return "", nil
 }
 
+func (pthi *PTHICommand) GetCertificateHashes() (hash CertHashEntry, err error) {
+	commandSize := (uint32)(12)
+	command := GetCertHashEntryRequest{
+		Header: CreateRequestHeader(GET_CERTHASH_ENTRY_REQUEST),
+	}
+	var bin_buf bytes.Buffer
+	binary.Write(&bin_buf, binary.LittleEndian, command)
+	result, err := pthi.Call(bin_buf.Bytes(), commandSize)
+	if err != nil {
+		var emptyHash CertHashEntry
+		return emptyHash, err
+	}
+	buf2 := bytes.NewBuffer(result)
+	response := GetCertHashEntryResponse {
+		Header: readHeaderResponse(buf2),
+	}
+
+	binary.Read(buf2, binary.LittleEndian, &response.Hash)
+
+	return response.Hash, nil
+}
+
+func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (status int, err error) {
+
+	commandSize := (uint32)(12)
+	command := GetRemoteAccessConnectionStatusRequest {
+		Header: CreateRequestHeader(GET_REMOTE_ACCESS_CONNECTION_STATUS_REQUEST),
+	}
+	var bin_buf bytes.Buffer
+	binary.Write(&bin_buf, binary.LittleEndian, command)
+	result, err := pthi.Call(bin_buf.Bytes(), commandSize)
+	if err != nil {
+		return 0, err
+	}
+	buf2 := bytes.NewBuffer(result)
+	response := GetRemoteAccessConnectionStatusResponse {
+		Header: readHeaderResponse(buf2),
+	}
+
+	binary.Read(buf2, binary.LittleEndian, &response.RemoteStatus)
+
+	return 0, nil
+}
+
+func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface int, err error) {
+	commandSize := (uint32)(12)
+	command := GetLANInterfaceSettingsRequest {
+		Header: CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST),
+	}
+	var bin_buf bytes.Buffer
+	binary.Write(&bin_buf, binary.LittleEndian, command)
+	result, err := pthi.Call(bin_buf.Bytes(), commandSize)
+	if err != nil {
+		return 0, err
+	}
+	buf2 := bytes.NewBuffer(result)
+	response := GetLANInterfaceSettingsResponse {
+		Header: readHeaderResponse(buf2),
+	}
+
+	binary.Read(buf2, binary.LittleEndian, &response.LinkStatus)
+
+	return 0, nil
+}
+
+
+func (pthi *PTHICommand) GetLocalSystemAccount() (localAccount int, err error)  {
+	commandSize := (uint32)(12)
+	command := GetLocalSystemAccountRequest {
+		Header: CreateRequestHeader(GET_LOCAL_SYSTEM_ACCOUNT_REQUEST),
+	}
+	var bin_buf bytes.Buffer
+	binary.Write(&bin_buf, binary.LittleEndian, command)
+	result, err := pthi.Call(bin_buf.Bytes(), commandSize)
+	if err != nil {
+		return 0, err
+	}
+	buf2 := bytes.NewBuffer(result)
+	response := GetLocalSystemAccountResponse {
+		Header: readHeaderResponse(buf2),
+	}
+
+	binary.Read(buf2, binary.LittleEndian, &response.Account)
+
+	return 0, nil
+}
 

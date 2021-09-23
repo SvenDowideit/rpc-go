@@ -172,17 +172,16 @@ type LocalSystemAccount struct {
 	Username [CFG_MAX_ACL_USER_LENGTH]uint8
 	Password [CFG_MAX_ACL_USER_LENGTH]uint8
 }
-type GetLocalSystemAccountResponse struct {
-	Header  MessageHeader
-	Status  uint32
-	Account LocalSystemAccount
-}
 
 type GetLocalSystemAccountRequest struct {
 	Header   MessageHeader
 	Reserved [40]uint8
 }
-
+type GetLocalSystemAccountResponse struct {
+	Header  ResponseMessageHeader
+	Status  uint32
+	Account LocalSystemAccount
+}
 type GetLANInterfaceSettingsRequest struct {
 	Header         MessageHeader
 	InterfaceIndex uint32
@@ -219,9 +218,21 @@ type GetCertHashEntryResponse struct {
 }
 
 type CertHashEntry struct {
-	IsDefault       uint32
-	IsActive        uint32
 	CertificateHash [CERT_HASH_MAX_LENGTH]uint8
+	Name            AMTANSIString
 	HashAlgorithm   uint8
-	// Name            AMT_ANSI_STRING
+	IsActive        uint32
+	IsDefault       uint32
+}
+
+type GetRemoteAccessConnectionStatusRequest struct {
+	Header MessageHeader	
+}
+
+type GetRemoteAccessConnectionStatusResponse struct {
+	Header ResponseMessageHeader
+	NetworkStatus AMTANSIString
+	RemoteStatus  AMTANSIString
+	RemoteTrigger AMTANSIString
+	MPSHostname   AMTANSIString
 }

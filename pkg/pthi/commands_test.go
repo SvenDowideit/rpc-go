@@ -32,3 +32,17 @@ func TestGetDNSSuffixV2(t *testing.T) {
 	assert.NotEmpty(t, result)
 
 }
+
+func TestGetCertificateHashes(t *testing.T) {
+	pthi := PTHICommand{}
+	err := pthi.heci.Init()
+	defer pthi.Close()
+	assert.NoError(t, err)
+	result, err := pthi.GetCertificateHashes()
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+
+}
+
+// /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashes$ rpc/pkg/pthi
