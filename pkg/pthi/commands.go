@@ -142,26 +142,57 @@ func (pthi *PTHICommand) GetDNSSuffix() (suffix string, err error) {
 	return "", nil
 }
 
-func (pthi *PTHICommand) GetCertificateHashes() (hash CertHashEntry, err error) {
-	commandSize := (uint32)(12)
-	command := GetCertHashEntryRequest{
-		Header: CreateRequestHeader(GET_CERTHASH_ENTRY_REQUEST),
+func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, err error) {
+	// Enumerate a list of hash handles to request from
+	enumerateCommandSize := (uint32)(12)
+	enumerateCommand := GetHashHandlesRequest {
+		Header: CreateRequestHeader(ENUMERATE_HASH_HANDLES_REQUEST),
 	}
-	var bin_buf bytes.Buffer
-	binary.Write(&bin_buf, binary.LittleEndian, command)
-	result, err := pthi.Call(bin_buf.Bytes(), commandSize)
+	var EnumerateBin_buf bytes.Buffer
+	binary.Write(&EnumerateBin_buf, binary.LittleEndian, enumerateCommand)
+	enumerateResult, err := pthi.Call(EnumerateBin_buf.Bytes(), enumerateCommandSize)
 	if err != nil {
-		var emptyHash CertHashEntry
-		return emptyHash, err
+		emptyHashList := []CertHashEntry{}
+		return emptyHashList, err
 	}
-	buf2 := bytes.NewBuffer(result)
-	response := GetCertHashEntryResponse {
-		Header: readHeaderResponse(buf2),
+	enumerateBuf2 := bytes.NewBuffer(enumerateResult)
+	enumerateResponse := GetHashHandlesResponse {
+		Header: readHeaderResponse(enumerateBuf2),
 	}
 
-	binary.Read(buf2, binary.LittleEndian, &response.Hash)
+	binary.Read(enumerateBuf2, binary.LittleEndian, &enumerateResponse.HashHandles.Length)
+	binary.Read(enumerateBuf2, binary.LittleEndian, &enumerateResponse.HashHandles.Handles)
 
-	return response.Hash, nil
+	// Request from the enumerated list and return cert hashes
+	for i := 0; i < int(enumerateResponse.HashHandles.Length); i++ {
+		commandSize := (uint32)(12)
+		command := GetCertHashEntryRequest {
+			Header: CreateRequestHeader(GET_CERTHASH_ENTRY_REQUEST),
+			HashHandle: enumerateResponse.HashHandles.Handles[i],
+		}
+		var bin_buf bytes.Buffer
+		binary.Write(&bin_buf, binary.LittleEndian, command)
+		result, err := pthi.Call(bin_buf.Bytes(), commandSize)
+		if err != nil {
+			emptyHashList := []CertHashEntry{}
+			return emptyHashList, err
+		}
+		buf2 := bytes.NewBuffer(result)
+		response := GetCertHashEntryResponse{
+			Header: readHeaderResponse(buf2),
+		}
+	
+		binary.Read(buf2, binary.LittleEndian, &response.Hash.CertificateHash)
+		binary.Read(buf2, binary.LittleEndian, &response.Hash.Name.Length)
+		binary.Read(buf2, binary.LittleEndian, &response.Hash.Name.Buffer)
+		binary.Read(buf2, binary.LittleEndian, &response.Hash.HashAlgorithm)
+		binary.Read(buf2, binary.LittleEndian, &response.Hash.IsActive)
+		binary.Read(buf2, binary.LittleEndian, &response.Hash.IsDefault)
+
+		hashEntryList = append(hashEntryList, response.Hash)
+	}
+	
+	return hashEntryList, nil
 }
 
 func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (status int, err error) {

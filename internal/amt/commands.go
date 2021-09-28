@@ -121,6 +121,16 @@ type AMT interface {
 	GetLocalSystemAccountV2() (LocalSystemAccount, error)
 	InitiateLMS()
 }
+
+func ANSI2String(ansi pthi.AMTANSIString) string {
+	output := ""
+	for i := 0; i < int(ansi.Length); i++ {
+		output = output + string(ansi.Buffer[i])
+	}
+
+	return output
+}
+
 type Command struct {
 }
 
@@ -365,38 +375,36 @@ func (amt Command) GetCertificateHashes() ([]CertHashEntry, error) {
 	return hashEntries, errors.New("unable to retrieve certificate hashes")
 }
 
-func GetCertificateHashesV2() (CertHashEntry, error) {
+func GetCertificateHashesV2() ([]CertHashEntry, error) {
 	pthi := pthi.NewPTHICommand()
 	defer pthi.Close()
-	result, err := pthi.GetCertificateHashes()
-	returnable := CertHashEntry{} 
-	if err != nil {
-		return returnable, err
-	}
-
-	hashString := ""
-	for i := 0; i < len(result.CertificateHash); i++ {
-		hashString = hashString + fmt.Sprintf("%02x", int(result.CertificateHash[i]))
-	}
-
-	hashName := ""
-	for i := 0; i < int(result.Name.Length); i++ {
-		hashName = hashName + string(result.Name.Buffer[i])
-	}
-
 	
-	returnable.Hash = hashString
-	returnable.Name = hashName
+	pthiEntryList, err := pthi.GetCertificateHashes()
+	amtEntryList := []CertHashEntry{} 
+	if err != nil {
+		return amtEntryList, err
+	}
 
-	return returnable, nil
-}
+	// Convert pthi results to amt results
+	for _, pthiEntry := range pthiEntryList {
+		hashString := ""
+		for i := 0; i < len(pthiEntry.CertificateHash); i++ {
+			hashString = hashString + fmt.Sprintf("%02x", int(pthiEntry.CertificateHash[i]))
+		}
+	
+		amtEntry := CertHashEntry {
+			Hash: hashString,
+			Name: ANSI2String(pthiEntry.Name),
+			Algorithm: string(pthiEntry.HashAlgorithm), // Find what the actual conversion is
+			IsActive: pthiEntry.IsActive > 0,
+			IsDefault: pthiEntry.IsDefault > 0,
+		} 
 
-func B2S(bs []uint8) string {
-    b := make([]byte, len(bs))
-    for i, v := range bs {
-        b[i] = byte(v)
-    }
-    return string(b)
+		amtEntryList = append(amtEntryList, amtEntry)
+	}
+
+
+	return amtEntryList, nil
 }
 
 // GetRemoteAccessConnectionStatus ...

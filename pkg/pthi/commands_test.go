@@ -42,7 +42,6 @@ func TestGetCertificateHashes(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
-
 }
 
-// /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashes$ rpc/pkg/pthi
+// sudo /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashes$ rpc/pkg/pthi

@@ -201,7 +201,17 @@ type AMTHashHandles struct {
 	Length  uint32
 	Handles [CERT_HASH_MAX_NUMBER]uint32
 }
+type CertHashEntry struct {
+	CertificateHash [CERT_HASH_MAX_LENGTH]uint8
+	Name            AMTANSIString
+	HashAlgorithm   uint8
+	IsActive        uint32
+	IsDefault       uint32
+}
 
+type GetHashHandlesRequest struct {
+	Header MessageHeader
+}
 type GetHashHandlesResponse struct {
 	Header      ResponseMessageHeader
 	HashHandles AMTHashHandles
@@ -217,13 +227,6 @@ type GetCertHashEntryResponse struct {
 	Hash   CertHashEntry
 }
 
-type CertHashEntry struct {
-	CertificateHash [CERT_HASH_MAX_LENGTH]uint8
-	Name            AMTANSIString
-	HashAlgorithm   uint8
-	IsActive        uint32
-	IsDefault       uint32
-}
 
 type GetRemoteAccessConnectionStatusRequest struct {
 	Header MessageHeader	
@@ -231,8 +234,8 @@ type GetRemoteAccessConnectionStatusRequest struct {
 
 type GetRemoteAccessConnectionStatusResponse struct {
 	Header ResponseMessageHeader
-	NetworkStatus AMTANSIString
-	RemoteStatus  AMTANSIString
-	RemoteTrigger AMTANSIString
+	NetworkStatus uint32
+	RemoteStatus  uint32
+	RemoteTrigger uint32
 	MPSHostname   AMTANSIString
 }
