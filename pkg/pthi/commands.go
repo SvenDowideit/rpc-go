@@ -47,7 +47,7 @@ func (pthi *PTHICommand) Call(command []byte, commandSize uint32) (result []byte
 	}
 	return readBuffer, nil
 }
-func CreateRequestHeader(command uint32) MessageHeader {
+func CreateRequestHeader(command uint32, length uint32) MessageHeader {
 	return MessageHeader{
 		Version: Version{
 			MajorNumber: 1,
@@ -57,13 +57,13 @@ func CreateRequestHeader(command uint32) MessageHeader {
 		Command: CommandFormat{
 			val: command,
 		},
-		Length: 0,
+		Length: length,
 	}
 }
 func (pthi *PTHICommand) GetUUID() (uuid string, err error) {
 	commandSize := (uint32)(12) //(uint32)(unsafe.Sizeof(GetUUIDRequest{}))
 	command := GetUUIDRequest{
-		Header: CreateRequestHeader(GET_UUID_REQUEST),
+		Header: CreateRequestHeader(GET_UUID_REQUEST, 0),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
@@ -84,7 +84,7 @@ func (pthi *PTHICommand) GetUUID() (uuid string, err error) {
 func (pthi *PTHICommand) GetControlMode() (state int, err error) {
 	commandSize := (uint32)(12)
 	command := GetControlModeRequest{
-		Header: CreateRequestHeader(GET_CONTROL_MODE_REQUEST),
+		Header: CreateRequestHeader(GET_CONTROL_MODE_REQUEST, 0),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
@@ -119,7 +119,7 @@ func readHeaderResponse(header *bytes.Buffer) ResponseMessageHeader {
 func (pthi *PTHICommand) GetDNSSuffix() (suffix string, err error) {
 	commandSize := (uint32)(12)
 	command := GetPKIFQDNSuffixRequest{
-		Header: CreateRequestHeader(GET_PKI_FQDN_SUFFIX_REQUEST),
+		Header: CreateRequestHeader(GET_PKI_FQDN_SUFFIX_REQUEST, 0),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
@@ -146,7 +146,7 @@ func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, 
 	// Enumerate a list of hash handles to request from
 	enumerateCommandSize := (uint32)(12)
 	enumerateCommand := GetHashHandlesRequest {
-		Header: CreateRequestHeader(ENUMERATE_HASH_HANDLES_REQUEST),
+		Header: CreateRequestHeader(ENUMERATE_HASH_HANDLES_REQUEST, 0),
 	}
 	var EnumerateBin_buf bytes.Buffer
 	binary.Write(&EnumerateBin_buf, binary.LittleEndian, enumerateCommand)
@@ -165,9 +165,9 @@ func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, 
 
 	// Request from the enumerated list and return cert hashes
 	for i := 0; i < int(enumerateResponse.HashHandles.Length); i++ {
-		commandSize := (uint32)(12)
+		commandSize := (uint32)(16)
 		command := GetCertHashEntryRequest {
-			Header: CreateRequestHeader(GET_CERTHASH_ENTRY_REQUEST),
+			Header: CreateRequestHeader(GET_CERTHASH_ENTRY_REQUEST, 4),
 			HashHandle: enumerateResponse.HashHandles.Handles[i],
 		}
 		var bin_buf bytes.Buffer
@@ -182,12 +182,12 @@ func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, 
 			Header: readHeaderResponse(buf2),
 		}
 	
+		binary.Read(buf2, binary.LittleEndian, &response.Hash.IsDefault)
+		binary.Read(buf2, binary.LittleEndian, &response.Hash.IsActive)
 		binary.Read(buf2, binary.LittleEndian, &response.Hash.CertificateHash)
+		binary.Read(buf2, binary.LittleEndian, &response.Hash.HashAlgorithm)
 		binary.Read(buf2, binary.LittleEndian, &response.Hash.Name.Length)
 		binary.Read(buf2, binary.LittleEndian, &response.Hash.Name.Buffer)
-		binary.Read(buf2, binary.LittleEndian, &response.Hash.HashAlgorithm)
-		binary.Read(buf2, binary.LittleEndian, &response.Hash.IsActive)
-		binary.Read(buf2, binary.LittleEndian, &response.Hash.IsDefault)
 
 		hashEntryList = append(hashEntryList, response.Hash)
 	}
@@ -195,54 +195,55 @@ func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, 
 	return hashEntryList, nil
 }
 
-func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (status int, err error) {
-
+func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAccessConnectionStatusResponse, err error) {
 	commandSize := (uint32)(12)
 	command := GetRemoteAccessConnectionStatusRequest {
-		Header: CreateRequestHeader(GET_REMOTE_ACCESS_CONNECTION_STATUS_REQUEST),
+		Header: CreateRequestHeader(GET_REMOTE_ACCESS_CONNECTION_STATUS_REQUEST, 0),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
 	result, err := pthi.Call(bin_buf.Bytes(), commandSize)
 	if err != nil {
-		return 0, err
+		emptyResponse := GetRemoteAccessConnectionStatusResponse {}
+		return emptyResponse, err
 	}
 	buf2 := bytes.NewBuffer(result)
 	response := GetRemoteAccessConnectionStatusResponse {
 		Header: readHeaderResponse(buf2),
 	}
 
-	binary.Read(buf2, binary.LittleEndian, &response.RemoteStatus)
+	binary.Read(buf2, binary.LittleEndian, &response.RemoteStatus) //more
 
-	return 0, nil
+	return response, nil
 }
 
-func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface int, err error) {
+func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface GetLANInterfaceSettingsResponse, err error) {
 	commandSize := (uint32)(12)
 	command := GetLANInterfaceSettingsRequest {
-		Header: CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST),
+		Header: CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST, 0),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
 	result, err := pthi.Call(bin_buf.Bytes(), commandSize)
 	if err != nil {
-		return 0, err
+		emptySettings := GetLANInterfaceSettingsResponse{}
+		return emptySettings, err
 	}
 	buf2 := bytes.NewBuffer(result)
 	response := GetLANInterfaceSettingsResponse {
 		Header: readHeaderResponse(buf2),
 	}
 
-	binary.Read(buf2, binary.LittleEndian, &response.LinkStatus)
+	binary.Read(buf2, binary.LittleEndian, &response.LinkStatus) //more
 
-	return 0, nil
+	return response, nil
 }
 
 
 func (pthi *PTHICommand) GetLocalSystemAccount() (localAccount int, err error)  {
 	commandSize := (uint32)(12)
 	command := GetLocalSystemAccountRequest {
-		Header: CreateRequestHeader(GET_LOCAL_SYSTEM_ACCOUNT_REQUEST),
+		Header: CreateRequestHeader(GET_LOCAL_SYSTEM_ACCOUNT_REQUEST, 0),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)

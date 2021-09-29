@@ -138,7 +138,7 @@ type Command struct {
 func (amt Command) Initialize() (bool, error) {
 	// initialize HECI interface
 	result := C.heci_Init(nil, 0)
-	if *((*bool)(unsafe.Pointer(&result))) == false {
+	if !*((*bool)(unsafe.Pointer(&result))) {
 		return false, errors.New("unable to initialize")
 	}
 
@@ -391,18 +391,19 @@ func GetCertificateHashesV2() ([]CertHashEntry, error) {
 		for i := 0; i < len(pthiEntry.CertificateHash); i++ {
 			hashString = hashString + fmt.Sprintf("%02x", int(pthiEntry.CertificateHash[i]))
 		}
+
+		_, algo := utils.InterpretHashAlgorithm(int(pthiEntry.HashAlgorithm))
 	
 		amtEntry := CertHashEntry {
 			Hash: hashString,
 			Name: ANSI2String(pthiEntry.Name),
-			Algorithm: string(pthiEntry.HashAlgorithm), // Find what the actual conversion is
+			Algorithm: algo,
 			IsActive: pthiEntry.IsActive > 0,
 			IsDefault: pthiEntry.IsDefault > 0,
 		} 
 
 		amtEntryList = append(amtEntryList, amtEntry)
 	}
-
 
 	return amtEntryList, nil
 }
@@ -439,16 +440,24 @@ func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
 	return remoteAccessStatus, errors.New("unable to retrieve remote access connection status")
 }
 
-// func GetRemoteAccessConnectionStatusV2() (RemoteAccessStatus, error) {
-// 	pthi := pthi.NewPTHICommand()
-// 	defer pthi.Close()
-// 	result, err := pthi.GetRemoteAccessConnectionStatus()
-// 	if err != nil {
-// 		//return nil, err
-// 	}
+func GetRemoteAccessConnectionStatusV2() (RemoteAccessStatus, error) {
+	pthi := pthi.NewPTHICommand()
+	defer pthi.Close()
+	result, err := pthi.GetRemoteAccessConnectionStatus()
+	if err != nil {
+		emptyRAStatus := RemoteAccessStatus{}
+		return emptyRAStatus, err
+	}
 
-// 	return result, nil
-// }
+	RAStatus := RemoteAccessStatus {
+		NetworkStatus: utils.InterpretAMTNetworkConnectionStatus(int(result.NetworkStatus)),
+		RemoteStatus: utils.InterpretRemoteAccessConnectionStatus(int(result.RemoteStatus)),
+		RemoteTrigger: utils.InterpretRemoteAccessTrigger(int(result.RemoteTrigger)),
+		MPSHostname: ANSI2String(result.MPSHostname),
+	}
+
+	return RAStatus, nil
+}
 
 // GetLANInterfaceSettings ...
 func (amt Command) GetLANInterfaceSettings(useWireless bool) (InterfaceSettings, error) {
@@ -503,16 +512,49 @@ func (amt Command) GetLANInterfaceSettings(useWireless bool) (InterfaceSettings,
 	return interfaceSettings, nil
 }
 
-// func GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSettings, error) {
-// 	pthi := pthi.NewPTHICommand()
-// 	defer pthi.Close()
-// 	result, err := pthi.GetLANInterfaceSettings()
-// 	if err != nil {
-// 		//return nil, err
-// 	}
+func GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSettings, error) {
+	pthi := pthi.NewPTHICommand()
+	defer pthi.Close()
+	result, err := pthi.GetLANInterfaceSettings(useWireless)
+	if err != nil {
+		emptySettings := InterfaceSettings{}
+		return emptySettings, err
+	}
 
-// 	return result, nil
-// }
+	settings := InterfaceSettings {
+		IsEnabled: result.Enabled > 0,
+		LinkStatus: "placeholder",
+		DHCPEnabled: result.DhcpEnabled > 0,
+		DHCPMode: "placeholder",
+		IPAddress: "placeholder",
+		MACAddress: "placeholder",
+	}
+
+	if result.LinkStatus == 1 {
+		settings.LinkStatus = "up"
+	} else {
+		settings.LinkStatus = "down"
+	}
+
+	if result.DhcpIpMode == 1 {
+		settings.DHCPMode = "active"
+	} else {
+		settings.DHCPMode = "passive"
+	}
+
+	str := string(result.Ipv4Address)
+	settings.IPAddress = str[:2] + "." + str[2:5] + "." + str[5:8] + "." + str[8:]
+
+	settings.MACAddress = (
+		string(result.MacAddress[0]) + ":" + 
+		string(result.MacAddress[1]) + ":" +
+		string(result.MacAddress[2]) + ":" + 
+		string(result.MacAddress[3]) + ":" +
+		string(result.MacAddress[4]) + ":" +
+		string(result.MacAddress[5]))
+
+	return settings, nil
+}
 
 // GetLocalSystemAccount ...
 func (amt Command) GetLocalSystemAccount() (LocalSystemAccount, error) {
