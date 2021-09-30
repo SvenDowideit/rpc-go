@@ -387,13 +387,14 @@ func (amt Command) GetCertificateHashesV2() ([]CertHashEntry, error) {
 
 	// Convert pthi results to amt results
 	for _, pthiEntry := range pthiEntryList {
+		
+		hashSize, algo := utils.InterpretHashAlgorithm(int(pthiEntry.HashAlgorithm))
+
 		hashString := ""
-		for i := 0; i < len(pthiEntry.CertificateHash); i++ {
+		for i := 0; i < hashSize; i++ {
 			hashString = hashString + fmt.Sprintf("%02x", int(pthiEntry.CertificateHash[i]))
 		}
-
-		_, algo := utils.InterpretHashAlgorithm(int(pthiEntry.HashAlgorithm))
-
+		
 		amtEntry := CertHashEntry{
 			Hash:      hashString,
 			Name:      ANSI2String(pthiEntry.Name),
@@ -542,7 +543,7 @@ func (amt Command) GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSetting
 		settings.DHCPMode = "passive"
 	}
 
-	str := string(result.Ipv4Address)
+	str := fmt.Sprint(result.Ipv4Address)
 	settings.IPAddress = str[:2] + "." + str[2:5] + "." + str[5:8] + "." + str[8:]
 
 	settings.MACAddress = (string(result.MacAddress[0]) + ":" +

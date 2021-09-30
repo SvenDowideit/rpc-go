@@ -25,7 +25,18 @@ func TestGetControlmode(t *testing.T) {
 }
 
 func TestGetDNSSuffix(t *testing.T) {
-	result, err := GetDNSSuffixV2()
+	amt := Command{}
+	result, err := amt.GetDNSSuffixV2()
 	assert.NoError(t, err)
 	assert.NotEqual(t, -1, result)
 }
+
+func TestGetCertificateHashesV2(t *testing.T) {
+	amt := Command{}
+	result, err := amt.GetCertificateHashesV2()
+	assert.NoError(t, err)
+	assert.NotEqual(t, -1, result)
+}
+
+
+// sudo /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashesV2$ rpc/internal/amt
