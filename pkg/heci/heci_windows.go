@@ -52,7 +52,6 @@ type HeciClientPacked struct {
 }
 
 func (heci *Heci) Init() error {
-	fmt.Println("hello world")
 	var err error
 	heci.GUID, err = windows.GUIDFromString("{E2D1FF34-3458-49A9-88DA-8E6915CE9BE5}")
 	if err != nil {

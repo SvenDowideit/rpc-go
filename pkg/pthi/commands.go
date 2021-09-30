@@ -60,6 +60,7 @@ func CreateRequestHeader(command uint32, length uint32) MessageHeader {
 		Length: length,
 	}
 }
+
 func (pthi *PTHICommand) GetUUID() (uuid string, err error) {
 	commandSize := (uint32)(12) //(uint32)(unsafe.Sizeof(GetUUIDRequest{}))
 	command := GetUUIDRequest{
@@ -145,7 +146,7 @@ func (pthi *PTHICommand) GetDNSSuffix() (suffix string, err error) {
 func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, err error) {
 	// Enumerate a list of hash handles to request from
 	enumerateCommandSize := (uint32)(12)
-	enumerateCommand := GetHashHandlesRequest {
+	enumerateCommand := GetHashHandlesRequest{
 		Header: CreateRequestHeader(ENUMERATE_HASH_HANDLES_REQUEST, 0),
 	}
 	var EnumerateBin_buf bytes.Buffer
@@ -156,7 +157,7 @@ func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, 
 		return emptyHashList, err
 	}
 	enumerateBuf2 := bytes.NewBuffer(enumerateResult)
-	enumerateResponse := GetHashHandlesResponse {
+	enumerateResponse := GetHashHandlesResponse{
 		Header: readHeaderResponse(enumerateBuf2),
 	}
 
@@ -166,12 +167,20 @@ func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, 
 	// Request from the enumerated list and return cert hashes
 	for i := 0; i < int(enumerateResponse.HashHandles.Length); i++ {
 		commandSize := (uint32)(16)
-		command := GetCertHashEntryRequest {
-			Header: CreateRequestHeader(GET_CERTHASH_ENTRY_REQUEST, 4),
+		command := GetCertHashEntryRequest{
+			Header:     CreateRequestHeader(GET_CERTHASH_ENTRY_REQUEST, 4),
 			HashHandle: enumerateResponse.HashHandles.Handles[i],
 		}
 		var bin_buf bytes.Buffer
 		binary.Write(&bin_buf, binary.LittleEndian, command)
+
+		// binary.Write(&bin_buf, binary.LittleEndian, command.Header.Version.MajorNumber)
+		// binary.Write(&bin_buf, binary.LittleEndian, command.Header.Version.MinorNumber)
+		// binary.Write(&bin_buf, binary.LittleEndian, command.Header.Reserved)
+		// binary.Write(&bin_buf, binary.LittleEndian, command.Header.Command.val)
+		// //binary.Write(&bin_buf, binary.LittleEndian, command.Header.Command.fields)
+		// binary.Write(&bin_buf, binary.LittleEndian, command.Header.Length)
+		// binary.Write(&bin_buf, binary.LittleEndian, command.HashHandle)
 		result, err := pthi.Call(bin_buf.Bytes(), commandSize)
 		if err != nil {
 			emptyHashList := []CertHashEntry{}
@@ -181,7 +190,7 @@ func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, 
 		response := GetCertHashEntryResponse{
 			Header: readHeaderResponse(buf2),
 		}
-	
+
 		binary.Read(buf2, binary.LittleEndian, &response.Hash.IsDefault)
 		binary.Read(buf2, binary.LittleEndian, &response.Hash.IsActive)
 		binary.Read(buf2, binary.LittleEndian, &response.Hash.CertificateHash)
@@ -191,24 +200,24 @@ func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, 
 
 		hashEntryList = append(hashEntryList, response.Hash)
 	}
-	
+
 	return hashEntryList, nil
 }
 
 func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAccessConnectionStatusResponse, err error) {
 	commandSize := (uint32)(12)
-	command := GetRemoteAccessConnectionStatusRequest {
+	command := GetRemoteAccessConnectionStatusRequest{
 		Header: CreateRequestHeader(GET_REMOTE_ACCESS_CONNECTION_STATUS_REQUEST, 0),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
 	result, err := pthi.Call(bin_buf.Bytes(), commandSize)
 	if err != nil {
-		emptyResponse := GetRemoteAccessConnectionStatusResponse {}
+		emptyResponse := GetRemoteAccessConnectionStatusResponse{}
 		return emptyResponse, err
 	}
 	buf2 := bytes.NewBuffer(result)
-	response := GetRemoteAccessConnectionStatusResponse {
+	response := GetRemoteAccessConnectionStatusResponse{
 		Header: readHeaderResponse(buf2),
 	}
 
@@ -219,7 +228,7 @@ func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAc
 
 func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface GetLANInterfaceSettingsResponse, err error) {
 	commandSize := (uint32)(12)
-	command := GetLANInterfaceSettingsRequest {
+	command := GetLANInterfaceSettingsRequest{
 		Header: CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST, 0),
 	}
 	var bin_buf bytes.Buffer
@@ -230,7 +239,7 @@ func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface
 		return emptySettings, err
 	}
 	buf2 := bytes.NewBuffer(result)
-	response := GetLANInterfaceSettingsResponse {
+	response := GetLANInterfaceSettingsResponse{
 		Header: readHeaderResponse(buf2),
 	}
 
@@ -239,10 +248,9 @@ func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface
 	return response, nil
 }
 
-
-func (pthi *PTHICommand) GetLocalSystemAccount() (localAccount int, err error)  {
+func (pthi *PTHICommand) GetLocalSystemAccount() (localAccount int, err error) {
 	commandSize := (uint32)(12)
-	command := GetLocalSystemAccountRequest {
+	command := GetLocalSystemAccountRequest{
 		Header: CreateRequestHeader(GET_LOCAL_SYSTEM_ACCOUNT_REQUEST, 0),
 	}
 	var bin_buf bytes.Buffer
@@ -252,7 +260,7 @@ func (pthi *PTHICommand) GetLocalSystemAccount() (localAccount int, err error)  
 		return 0, err
 	}
 	buf2 := bytes.NewBuffer(result)
-	response := GetLocalSystemAccountResponse {
+	response := GetLocalSystemAccountResponse{
 		Header: readHeaderResponse(buf2),
 	}
 
@@ -260,4 +268,3 @@ func (pthi *PTHICommand) GetLocalSystemAccount() (localAccount int, err error)  
 
 	return 0, nil
 }
-

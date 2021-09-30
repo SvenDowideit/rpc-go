@@ -125,8 +125,8 @@ type Version struct {
 	MinorNumber uint8
 }
 type CommandFormat struct {
-	val    uint32
-	fields [3]uint32
+	val uint32
+	// fields [3]uint32
 }
 type MessageHeader struct {
 	Version  Version
@@ -227,13 +227,12 @@ type GetCertHashEntryResponse struct {
 	Hash   CertHashEntry
 }
 
-
 type GetRemoteAccessConnectionStatusRequest struct {
-	Header MessageHeader	
+	Header MessageHeader
 }
 
 type GetRemoteAccessConnectionStatusResponse struct {
-	Header ResponseMessageHeader
+	Header        ResponseMessageHeader
 	NetworkStatus uint32
 	RemoteStatus  uint32
 	RemoteTrigger uint32
