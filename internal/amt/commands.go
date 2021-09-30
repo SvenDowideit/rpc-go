@@ -544,7 +544,11 @@ func (amt Command) GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSetting
 	}
 
 	str := fmt.Sprint(result.Ipv4Address)
-	settings.IPAddress = str[:2] + "." + str[2:5] + "." + str[5:8] + "." + str[8:]
+	if str == "0" {
+		settings.IPAddress = "0.0.0.0"
+	} else {
+		settings.IPAddress = str[:2] + "." + str[2:5] + "." + str[5:8] + "." + str[8:]
+	}
 
 	settings.MACAddress = (string(result.MacAddress[0]) + ":" +
 		string(result.MacAddress[1]) + ":" +
