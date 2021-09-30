@@ -226,6 +226,10 @@ func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface
 	commandSize := (uint32)(16)
 	command := GetLANInterfaceSettingsRequest{
 		Header: CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST, 4),
+		InterfaceIndex: 0,
+	}
+	if useWireless {
+		command.InterfaceIndex = 1
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
