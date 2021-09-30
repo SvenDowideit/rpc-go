@@ -59,4 +59,11 @@ func TestGetLANInterfaceSettingsV2False(t *testing.T) {
 	assert.NotEqual(t, -1, result)
 }
 
+func TestGetLocalSystemAccountV2(t *testing.T) {
+	amt := Command{}
+	result, err := amt.GetLocalSystemAccountV2()
+	assert.NoError(t, err)
+	assert.NotEqual(t, -1, result)
+}
+
 // sudo /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashesV2$ rpc/internal/amt

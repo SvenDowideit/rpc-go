@@ -77,4 +77,15 @@ func TestGetLANInterfaceSettingsFalse(t *testing.T) {
 	assert.NotEmpty(t, result)
 }
 
+func TestGetLocalSystemAccount(t *testing.T) {
+	pthi := PTHICommand{}
+	err := pthi.heci.Init()
+	defer pthi.Close()
+	assert.NoError(t, err)
+	result, err := pthi.GetLocalSystemAccount()
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+}
+
 // sudo /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashes$ rpc/pkg/pthi

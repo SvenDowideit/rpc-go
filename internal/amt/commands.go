@@ -580,14 +580,30 @@ func (amt Command) GetLocalSystemAccount() (LocalSystemAccount, error) {
 }
 
 func (amt Command) GetLocalSystemAccountV2() (LocalSystemAccount, error) {
-	// pthi := pthi.NewPTHICommand()
-	// defer pthi.Close()
-	// result, err := pthi.GetLocalSystemAccount()
-	// if err != nil {
-	// 	//return nil, err
-	// }
+	pthi := pthi.NewPTHICommand()
+	defer pthi.Close()
+	result, err := pthi.GetLocalSystemAccount()
+	if err != nil {
+		emptySystemAccount := LocalSystemAccount{}
+		return emptySystemAccount, err
+	}
 
-	return LocalSystemAccount{}, nil
+	username := ""
+	for i := 0; i < 33; i++ {
+		username = username + fmt.Sprintf("%02x", int(result.Account.Username[i]))
+	}
+
+	password := ""
+	for i := 0; i < 33; i++ {
+		password = password + fmt.Sprintf("%02x", int(result.Account.Password[i]))
+	}
+
+	lsa := LocalSystemAccount {
+		Username: username,
+		Password: password,
+	}
+
+	return lsa, nil
 }
 
 // InitiateLMS ...
