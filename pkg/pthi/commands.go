@@ -227,9 +227,9 @@ func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAc
 }
 
 func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface GetLANInterfaceSettingsResponse, err error) {
-	commandSize := (uint32)(12)
+	commandSize := (uint32)(16)
 	command := GetLANInterfaceSettingsRequest{
-		Header: CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST, 0),
+		Header: CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST, 4),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
