@@ -173,14 +173,6 @@ func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, 
 		}
 		var bin_buf bytes.Buffer
 		binary.Write(&bin_buf, binary.LittleEndian, command)
-
-		// binary.Write(&bin_buf, binary.LittleEndian, command.Header.Version.MajorNumber)
-		// binary.Write(&bin_buf, binary.LittleEndian, command.Header.Version.MinorNumber)
-		// binary.Write(&bin_buf, binary.LittleEndian, command.Header.Reserved)
-		// binary.Write(&bin_buf, binary.LittleEndian, command.Header.Command.val)
-		// //binary.Write(&bin_buf, binary.LittleEndian, command.Header.Command.fields)
-		// binary.Write(&bin_buf, binary.LittleEndian, command.Header.Length)
-		// binary.Write(&bin_buf, binary.LittleEndian, command.HashHandle)
 		result, err := pthi.Call(bin_buf.Bytes(), commandSize)
 		if err != nil {
 			emptyHashList := []CertHashEntry{}
@@ -221,7 +213,11 @@ func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAc
 		Header: readHeaderResponse(buf2),
 	}
 
-	binary.Read(buf2, binary.LittleEndian, &response.RemoteStatus) //more
+	binary.Read(buf2, binary.LittleEndian, &response.NetworkStatus)
+	binary.Read(buf2, binary.LittleEndian, &response.RemoteStatus)
+	binary.Read(buf2, binary.LittleEndian, &response.RemoteTrigger)
+	binary.Read(buf2, binary.LittleEndian, &response.MPSHostname.Length)
+	binary.Read(buf2, binary.LittleEndian, &response.MPSHostname.Buffer)
 
 	return response, nil
 }
