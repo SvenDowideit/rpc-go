@@ -289,7 +289,7 @@ func (amt Command) GetDNSSuffix() (string, error) {
 	if err != nil {
 		return "", err
 	}
-  
+
 	dnsSuffix := AMTANSIString{}
 	packedDNSSuffix := C.struct__AMT_ANSI_STRING{}
 	status := C.pthi_GetDnsSuffix(&packedDNSSuffix)
@@ -309,7 +309,7 @@ func (amt Command) GetDNSSuffix() (string, error) {
 	return "", errors.New("unable to retrieve DNS suffix")
 }
 
-func GetDNSSuffixV2() (string, error) {
+func (amt Command) GetDNSSuffixV2() (string, error) {
 	pthi := pthi.NewPTHICommand()
 	defer pthi.Close()
 	result, err := pthi.GetDNSSuffix()
@@ -375,32 +375,33 @@ func (amt Command) GetCertificateHashes() ([]CertHashEntry, error) {
 	return hashEntries, errors.New("unable to retrieve certificate hashes")
 }
 
-func GetCertificateHashesV2() ([]CertHashEntry, error) {
+func (amt Command) GetCertificateHashesV2() ([]CertHashEntry, error) {
 	pthi := pthi.NewPTHICommand()
 	defer pthi.Close()
-	
+
 	pthiEntryList, err := pthi.GetCertificateHashes()
-	amtEntryList := []CertHashEntry{} 
+	amtEntryList := []CertHashEntry{}
 	if err != nil {
 		return amtEntryList, err
 	}
 
 	// Convert pthi results to amt results
 	for _, pthiEntry := range pthiEntryList {
+		
+		hashSize, algo := utils.InterpretHashAlgorithm(int(pthiEntry.HashAlgorithm))
+
 		hashString := ""
-		for i := 0; i < len(pthiEntry.CertificateHash); i++ {
+		for i := 0; i < hashSize; i++ {
 			hashString = hashString + fmt.Sprintf("%02x", int(pthiEntry.CertificateHash[i]))
 		}
 
-		_, algo := utils.InterpretHashAlgorithm(int(pthiEntry.HashAlgorithm))
-	
-		amtEntry := CertHashEntry {
-			Hash: hashString,
-			Name: ANSI2String(pthiEntry.Name),
+		amtEntry := CertHashEntry{
+			Hash:      hashString,
+			Name:      ANSI2String(pthiEntry.Name),
 			Algorithm: algo,
-			IsActive: pthiEntry.IsActive > 0,
+			IsActive:  pthiEntry.IsActive > 0,
 			IsDefault: pthiEntry.IsDefault > 0,
-		} 
+		}
 
 		amtEntryList = append(amtEntryList, amtEntry)
 	}
@@ -435,12 +436,12 @@ func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
 			remoteAccessStatus.MPSHostname = strings.Trim(C.GoString(cStrings[0]), "\xab")
 		}
 	} else {
-		return remoteAccessStatus, nil
+		return remoteAccessStatus, errors.New("unable to retrieve remote access connection status")
 	}
-	return remoteAccessStatus, errors.New("unable to retrieve remote access connection status")
+	return remoteAccessStatus, nil
 }
 
-func GetRemoteAccessConnectionStatusV2() (RemoteAccessStatus, error) {
+func (amt Command) GetRemoteAccessConnectionStatusV2() (RemoteAccessStatus, error) {
 	pthi := pthi.NewPTHICommand()
 	defer pthi.Close()
 	result, err := pthi.GetRemoteAccessConnectionStatus()
@@ -449,11 +450,11 @@ func GetRemoteAccessConnectionStatusV2() (RemoteAccessStatus, error) {
 		return emptyRAStatus, err
 	}
 
-	RAStatus := RemoteAccessStatus {
+	RAStatus := RemoteAccessStatus{
 		NetworkStatus: utils.InterpretAMTNetworkConnectionStatus(int(result.NetworkStatus)),
-		RemoteStatus: utils.InterpretRemoteAccessConnectionStatus(int(result.RemoteStatus)),
+		RemoteStatus:  utils.InterpretRemoteAccessConnectionStatus(int(result.RemoteStatus)),
 		RemoteTrigger: utils.InterpretRemoteAccessTrigger(int(result.RemoteTrigger)),
-		MPSHostname: ANSI2String(result.MPSHostname),
+		MPSHostname:   ANSI2String(result.MPSHostname),
 	}
 
 	return RAStatus, nil
@@ -512,7 +513,7 @@ func (amt Command) GetLANInterfaceSettings(useWireless bool) (InterfaceSettings,
 	return interfaceSettings, nil
 }
 
-func GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSettings, error) {
+func (amt Command) GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSettings, error) {
 	pthi := pthi.NewPTHICommand()
 	defer pthi.Close()
 	result, err := pthi.GetLANInterfaceSettings(useWireless)
@@ -521,13 +522,13 @@ func GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSettings, error) {
 		return emptySettings, err
 	}
 
-	settings := InterfaceSettings {
-		IsEnabled: result.Enabled > 0,
-		LinkStatus: "placeholder",
+	settings := InterfaceSettings{
+		IsEnabled:   result.Enabled > 0,
+		LinkStatus:  "placeholder",
 		DHCPEnabled: result.DhcpEnabled > 0,
-		DHCPMode: "placeholder",
-		IPAddress: "placeholder",
-		MACAddress: "placeholder",
+		DHCPMode:    "placeholder",
+		IPAddress:   "placeholder",
+		MACAddress:  "placeholder",
 	}
 
 	if result.LinkStatus == 1 {
@@ -542,13 +543,12 @@ func GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSettings, error) {
 		settings.DHCPMode = "passive"
 	}
 
-	str := string(result.Ipv4Address)
+	str := fmt.Sprint(result.Ipv4Address)
 	settings.IPAddress = str[:2] + "." + str[2:5] + "." + str[5:8] + "." + str[8:]
 
-	settings.MACAddress = (
-		string(result.MacAddress[0]) + ":" + 
+	settings.MACAddress = (string(result.MacAddress[0]) + ":" +
 		string(result.MacAddress[1]) + ":" +
-		string(result.MacAddress[2]) + ":" + 
+		string(result.MacAddress[2]) + ":" +
 		string(result.MacAddress[3]) + ":" +
 		string(result.MacAddress[4]) + ":" +
 		string(result.MacAddress[5]))
@@ -579,16 +579,36 @@ func (amt Command) GetLocalSystemAccount() (LocalSystemAccount, error) {
 
 }
 
-// func GetLocalSystemAccountV2() (LocalSystemAccount, error) {
-// 	pthi := pthi.NewPTHICommand()
-// 	defer pthi.Close()
-// 	result, err := pthi.GetLocalSystemAccount()
-// 	if err != nil {
-// 		//return nil, err
-// 	}
+func (amt Command) GetLocalSystemAccountV2() (LocalSystemAccount, error) {
+	pthi := pthi.NewPTHICommand()
+	defer pthi.Close()
+	result, err := pthi.GetLocalSystemAccount()
+	if err != nil {
+		emptySystemAccount := LocalSystemAccount{}
+		return emptySystemAccount, err
+	}
 
-// 	return result, nil
-// }
+	username := ""
+	for i := 0; i < len(result.Account.Username); i++ {
+		if string(result.Account.Username[i]) != "\x00" {
+			username = username + string(result.Account.Username[i])
+		}
+	}
+
+	password := ""
+	for i := 0; i < len(result.Account.Password); i++ {
+		if string(result.Account.Password[i]) != "\x00" {
+			password = password + string(result.Account.Password[i])
+		}
+	}
+
+	lsa := LocalSystemAccount {
+		Username: username,
+		Password: password,
+	}
+
+	return lsa, nil
+}
 
 // InitiateLMS ...
 func (amt Command) InitiateLMS() {

@@ -2,7 +2,7 @@
  * Copyright (c) Intel Corporation 2021
  * SPDX-License-Identifier: Apache-2.0
  **********************************************************************/
-package mps
+package rps
 
 import (
 	"rpc/internal/amt"
@@ -27,16 +27,29 @@ func (c MockAMT) GetControlMode() (int, error)                    { return 1, ni
 func (c MockAMT) GetControlModeV2() (int, error)                  { return 1, nil }
 func (c MockAMT) GetOSDNSSuffix() (string, error)                 { return "osdns", nil }
 func (c MockAMT) GetDNSSuffix() (string, error)                   { return mebxDNSSuffix, nil }
+func (c MockAMT) GetDNSSuffixV2() (string, error)                 { return mebxDNSSuffix, nil }
+func (c MockAMT) GetCertificateHashesV2() ([]amt.CertHashEntry, error) {
+	return []amt.CertHashEntry{}, nil
+}
 func (c MockAMT) GetCertificateHashes() ([]amt.CertHashEntry, error) {
 	return []amt.CertHashEntry{}, nil
 }
 func (c MockAMT) GetRemoteAccessConnectionStatus() (amt.RemoteAccessStatus, error) {
 	return amt.RemoteAccessStatus{}, nil
 }
+func (c MockAMT) GetRemoteAccessConnectionStatusV2() (amt.RemoteAccessStatus, error) {
+	return amt.RemoteAccessStatus{}, nil
+}
 func (c MockAMT) GetLANInterfaceSettings(useWireless bool) (amt.InterfaceSettings, error) {
 	return amt.InterfaceSettings{}, nil
 }
+func (c MockAMT) GetLANInterfaceSettingsV2(useWireless bool) (amt.InterfaceSettings, error) {
+	return amt.InterfaceSettings{}, nil
+}
 func (c MockAMT) GetLocalSystemAccount() (amt.LocalSystemAccount, error) {
+	return amt.LocalSystemAccount{Username: "Username", Password: "Password"}, nil
+}
+func (c MockAMT) GetLocalSystemAccountV2() (amt.LocalSystemAccount, error) {
 	return amt.LocalSystemAccount{Username: "Username", Password: "Password"}, nil
 }
 
