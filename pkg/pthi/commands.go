@@ -250,9 +250,9 @@ func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface
 }
 
 func (pthi *PTHICommand) GetLocalSystemAccount() (localAccount GetLocalSystemAccountResponse, err error) {
-	commandSize := (uint32)(22)
+	commandSize := (uint32)(52)
 	command := GetLocalSystemAccountRequest{
-		Header: CreateRequestHeader(GET_LOCAL_SYSTEM_ACCOUNT_REQUEST, 0),
+		Header: CreateRequestHeader(GET_LOCAL_SYSTEM_ACCOUNT_REQUEST, 40),
 	}
 	var bin_buf bytes.Buffer
 	binary.Write(&bin_buf, binary.LittleEndian, command)
@@ -266,7 +266,6 @@ func (pthi *PTHICommand) GetLocalSystemAccount() (localAccount GetLocalSystemAcc
 		Header: readHeaderResponse(buf2),
 	}
 
-	binary.Read(buf2, binary.LittleEndian, &response.Status)
 	binary.Read(buf2, binary.LittleEndian, &response.Account.Username)
 	binary.Read(buf2, binary.LittleEndian, &response.Account.Password)
 

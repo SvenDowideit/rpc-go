@@ -436,9 +436,9 @@ func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
 			remoteAccessStatus.MPSHostname = strings.Trim(C.GoString(cStrings[0]), "\xab")
 		}
 	} else {
-		return remoteAccessStatus, nil //swap?
+		return remoteAccessStatus, errors.New("unable to retrieve remote access connection status")
 	}
-	return remoteAccessStatus, errors.New("unable to retrieve remote access connection status") //swap?
+	return remoteAccessStatus, nil
 }
 
 func (amt Command) GetRemoteAccessConnectionStatusV2() (RemoteAccessStatus, error) {
@@ -589,13 +589,17 @@ func (amt Command) GetLocalSystemAccountV2() (LocalSystemAccount, error) {
 	}
 
 	username := ""
-	for i := 0; i < 33; i++ {
-		username = username + fmt.Sprintf("%02x", int(result.Account.Username[i]))
+	for i := 0; i < len(result.Account.Username); i++ {
+		if string(result.Account.Username[i]) != "\x00" {
+			username = username + string(result.Account.Username[i])
+		}
 	}
 
 	password := ""
-	for i := 0; i < 33; i++ {
-		password = password + fmt.Sprintf("%02x", int(result.Account.Password[i]))
+	for i := 0; i < len(result.Account.Username); i++ {
+		if string(result.Account.Username[i]) != "\x00" {
+			username = username + string(result.Account.Username[i])
+		}
 	}
 
 	lsa := LocalSystemAccount {
