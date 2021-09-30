@@ -526,18 +526,16 @@ func (amt Command) GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSetting
 		IPAddress:   "0.0.0.0",
 		IsEnabled:   result.Enabled == 1,
 		DHCPEnabled: result.DhcpEnabled == 1,
+		LinkStatus:  "down",
+		DHCPMode:    "passive",
 	}
 
 	if result.LinkStatus == 1 {
 		settings.LinkStatus = "up"
-	} else {
-		settings.LinkStatus = "down"
 	}
 
 	if result.DhcpIpMode == 1 {
 		settings.DHCPMode = "active"
-	} else {
-		settings.DHCPMode = "passive"
 	}
 
 	str := fmt.Sprint(result.Ipv4Address)
