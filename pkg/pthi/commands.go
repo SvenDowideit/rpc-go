@@ -223,7 +223,7 @@ func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAc
 }
 
 func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface GetLANInterfaceSettingsResponse, err error) {
-	commandSize := (uint32)(12)
+	commandSize := (uint32)(13)
 	command := GetLANInterfaceSettingsRequest{
 		Header: CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST, 0),
 	}
@@ -250,7 +250,7 @@ func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface
 }
 
 func (pthi *PTHICommand) GetLocalSystemAccount() (localAccount GetLocalSystemAccountResponse, err error) {
-	commandSize := (uint32)(12)
+	commandSize := (uint32)(22)
 	command := GetLocalSystemAccountRequest{
 		Header: CreateRequestHeader(GET_LOCAL_SYSTEM_ACCOUNT_REQUEST, 0),
 	}
