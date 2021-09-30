@@ -387,7 +387,7 @@ func (amt Command) GetCertificateHashesV2() ([]CertHashEntry, error) {
 
 	// Convert pthi results to amt results
 	for _, pthiEntry := range pthiEntryList {
-		
+
 		hashSize, algo := utils.InterpretHashAlgorithm(int(pthiEntry.HashAlgorithm))
 
 		hashString := ""
@@ -523,12 +523,8 @@ func (amt Command) GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSetting
 	}
 
 	settings := InterfaceSettings{
-		IsEnabled:   result.Enabled > 0,
-		LinkStatus:  "placeholder",
-		DHCPEnabled: result.DhcpEnabled > 0,
-		DHCPMode:    "placeholder",
-		IPAddress:   "placeholder",
-		MACAddress:  "placeholder",
+		IsEnabled:   result.Enabled == 1,
+		DHCPEnabled: result.DhcpEnabled == 1,
 	}
 
 	if result.LinkStatus == 1 {
@@ -544,7 +540,11 @@ func (amt Command) GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSetting
 	}
 
 	str := fmt.Sprint(result.Ipv4Address)
-	settings.IPAddress = str[:2] + "." + str[2:5] + "." + str[5:8] + "." + str[8:]
+	if str != "0" {
+		settings.IPAddress = str[:2] + "." + str[2:5] + "." + str[5:8] + "." + str[8:]
+	} else {
+		settings.IPAddress = "0.0.0.0"
+	}
 
 	settings.MACAddress = (string(result.MacAddress[0]) + ":" +
 		string(result.MacAddress[1]) + ":" +
@@ -602,7 +602,7 @@ func (amt Command) GetLocalSystemAccountV2() (LocalSystemAccount, error) {
 		}
 	}
 
-	lsa := LocalSystemAccount {
+	lsa := LocalSystemAccount{
 		Username: username,
 		Password: password,
 	}
