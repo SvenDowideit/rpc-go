@@ -596,9 +596,9 @@ func (amt Command) GetLocalSystemAccountV2() (LocalSystemAccount, error) {
 	}
 
 	password := ""
-	for i := 0; i < len(result.Account.Username); i++ {
-		if string(result.Account.Username[i]) != "\x00" {
-			username = username + string(result.Account.Username[i])
+	for i := 0; i < len(result.Account.Password); i++ {
+		if string(result.Account.Password[i]) != "\x00" {
+			password = password + string(result.Account.Password[i])
 		}
 	}
 
