@@ -523,6 +523,7 @@ func (amt Command) GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSetting
 	}
 
 	settings := InterfaceSettings{
+		IPAddress:   "0.0.0.0",
 		IsEnabled:   result.Enabled == 1,
 		DHCPEnabled: result.DhcpEnabled == 1,
 	}
@@ -542,8 +543,6 @@ func (amt Command) GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSetting
 	str := fmt.Sprint(result.Ipv4Address)
 	if str != "0" {
 		settings.IPAddress = str[:2] + "." + str[2:5] + "." + str[5:8] + "." + str[8:]
-	} else {
-		settings.IPAddress = "0.0.0.0"
 	}
 
 	settings.MACAddress = (string(result.MacAddress[0]) + ":" +
