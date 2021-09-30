@@ -44,4 +44,37 @@ func TestGetCertificateHashes(t *testing.T) {
 	assert.NotEmpty(t, result)
 }
 
+func TestGetRemoteAccessConnectionStatus(t *testing.T) {
+	pthi := PTHICommand{}
+	err := pthi.heci.Init()
+	defer pthi.Close()
+	assert.NoError(t, err)
+	result, err := pthi.GetRemoteAccessConnectionStatus()
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+}
+
+func TestGetLANInterfaceSettingsTrue(t *testing.T) {
+	pthi := PTHICommand{}
+	err := pthi.heci.Init()
+	defer pthi.Close()
+	assert.NoError(t, err)
+	result, err := pthi.GetLANInterfaceSettings(true)
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+}
+
+func TestGetLANInterfaceSettingsFalse(t *testing.T) {
+	pthi := PTHICommand{}
+	err := pthi.heci.Init()
+	defer pthi.Close()
+	assert.NoError(t, err)
+	result, err := pthi.GetLANInterfaceSettings(false)
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+}
+
 // sudo /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashes$ rpc/pkg/pthi

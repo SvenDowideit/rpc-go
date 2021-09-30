@@ -38,5 +38,25 @@ func TestGetCertificateHashesV2(t *testing.T) {
 	assert.NotEqual(t, -1, result)
 }
 
+func TestGetRemoteAccessConnectionStatusV2(t *testing.T) {
+	amt := Command{}
+	result, err := amt.GetRemoteAccessConnectionStatusV2()
+	assert.NoError(t, err)
+	assert.NotEqual(t, -1, result)
+}
+
+func TestGetLANInterfaceSettingsV2True(t *testing.T) {
+	amt := Command{}
+	result, err := amt.GetLANInterfaceSettingsV2(true)
+	assert.NoError(t, err)
+	assert.NotEqual(t, -1, result)
+}
+
+func TestGetLANInterfaceSettingsV2False(t *testing.T) {
+	amt := Command{}
+	result, err := amt.GetLANInterfaceSettingsV2(false)
+	assert.NoError(t, err)
+	assert.NotEqual(t, -1, result)
+}
 
 // sudo /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashesV2$ rpc/internal/amt

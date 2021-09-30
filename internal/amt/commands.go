@@ -394,7 +394,7 @@ func (amt Command) GetCertificateHashesV2() ([]CertHashEntry, error) {
 		for i := 0; i < hashSize; i++ {
 			hashString = hashString + fmt.Sprintf("%02x", int(pthiEntry.CertificateHash[i]))
 		}
-		
+
 		amtEntry := CertHashEntry{
 			Hash:      hashString,
 			Name:      ANSI2String(pthiEntry.Name),
@@ -436,9 +436,9 @@ func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
 			remoteAccessStatus.MPSHostname = strings.Trim(C.GoString(cStrings[0]), "\xab")
 		}
 	} else {
-		return remoteAccessStatus, nil
+		return remoteAccessStatus, nil //swap?
 	}
-	return remoteAccessStatus, errors.New("unable to retrieve remote access connection status")
+	return remoteAccessStatus, errors.New("unable to retrieve remote access connection status") //swap?
 }
 
 func (amt Command) GetRemoteAccessConnectionStatusV2() (RemoteAccessStatus, error) {

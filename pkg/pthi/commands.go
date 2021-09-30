@@ -239,7 +239,12 @@ func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface
 		Header: readHeaderResponse(buf2),
 	}
 
-	binary.Read(buf2, binary.LittleEndian, &response.LinkStatus) //more
+	binary.Read(buf2, binary.LittleEndian, &response.Enabled)
+	binary.Read(buf2, binary.LittleEndian, &response.Ipv4Address)
+	binary.Read(buf2, binary.LittleEndian, &response.DhcpEnabled)
+	binary.Read(buf2, binary.LittleEndian, &response.DhcpIpMode)
+	binary.Read(buf2, binary.LittleEndian, &response.LinkStatus)
+	binary.Read(buf2, binary.LittleEndian, &response.MacAddress)
 
 	return response, nil
 }
