@@ -550,12 +550,12 @@ func (amt Command) GetLANInterfaceSettingsV2(useWireless bool) (InterfaceSetting
 		settings.IPAddress = str[:2] + "." + str[2:5] + "." + str[5:8] + "." + str[8:]
 	}
 
-	settings.MACAddress = (string(result.MacAddress[0]) + ":" +
-		string(result.MacAddress[1]) + ":" +
-		string(result.MacAddress[2]) + ":" +
-		string(result.MacAddress[3]) + ":" +
-		string(result.MacAddress[4]) + ":" +
-		string(result.MacAddress[5]))
+	settings.MACAddress = (fmt.Sprint(result.MacAddress[0]) + ":" +
+		fmt.Sprint(result.MacAddress[1]) + ":" +
+		fmt.Sprint(result.MacAddress[2]) + ":" +
+		fmt.Sprint(result.MacAddress[3]) + ":" +
+		fmt.Sprint(result.MacAddress[4]) + ":" +
+		fmt.Sprint(result.MacAddress[5]))
 
 	return settings, nil
 }
