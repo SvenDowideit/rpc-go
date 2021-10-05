@@ -45,10 +45,9 @@ func main() {
 	lms := lms.LMSConnection{}
 	err = lms.Connect(utils.LMSAddress, utils.LMSPort)
 
-	amt := amt.Command{}
 	if err != nil {
 		log.Trace("nope!\n")
-		go amt.InitiateLMS()
+		go lms.InitiateLMS()
 	} else {
 		log.Trace("yes!\n")
 	}

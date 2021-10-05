@@ -4,20 +4,6 @@
  **********************************************************************/
 package amt
 
-// #cgo linux CFLAGS: -g -Wno-error -Wformat -Wformat-security -D_POSIX -DBUILD_LIBRARY -D_FORTIFY_SOURCE=2 -fstack-protector-strong
-// #cgo windows CFLAGS: -g -w -DMICROSTACK_NO_STDAFX -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -DMICROSTACK_NO_STDAFX -DWINSOCK2 -DMICROSTACK_NOTLS -D_UNICODE -D_WINDOWS -D_WIN32_WINNT=0x0A00 -DBUILD_LIBRARY
-// #cgo windows LDFLAGS: -lDbgHelp -lIphlpapi -lSetupapi -lws2_32 -lPsapi -lCrypt32 -lWintrust -lVersion -lWtsapi32 -lGdiplus -lUserenv -lgdi32 -lucrtbase
-// #include "../../microlms/MicroLMS/main.c"
-// #include "../../microlms/core/utils.c"
-// #include "../../microlms/heci/HECIWin.c"
-// #include "../../microlms/heci/HECILinux.c"
-// #include "../../microlms/heci/LMEConnection.c"
-// #include "../../microlms/heci/PTHICommand.c"
-// #include "../../microlms/microstack/ILibAsyncServerSocket.c"
-// #include "../../microlms/microstack/ILibAsyncSocket.c"
-// #include "../../microlms/microstack/ILibLMS.c"
-// #include "../../microlms/microstack/ILibParsers.c"
-import "C"
 import (
 	"errors"
 	"fmt"
@@ -50,12 +36,6 @@ type CodeVersions struct {
 	Versions      [50]AMTVersionType //[VERSIONS_NUMBER]
 }
 
-// AMTANSIString ...
-type AMTANSIString struct {
-	Length uint16
-	Buffer [1000]C.char
-}
-
 // InterfaceSettings ...
 type InterfaceSettings struct {
 	IsEnabled   bool
@@ -72,15 +52,6 @@ type RemoteAccessStatus struct {
 	RemoteStatus  string
 	RemoteTrigger string
 	MPSHostname   string
-}
-
-// CCertHashEntry is used for reading data from the C call for Cert Hashes
-type CCertHashEntry struct {
-	CertificateHash [64]uint8
-	HashAlgorithm   uint8
-	IsActive        uint32
-	IsDefault       uint32
-	Name            AMTANSIString
 }
 
 // CertHashEntry is the GO struct for holding Cert Hash Entries
@@ -109,7 +80,6 @@ type AMT interface {
 	GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
 	GetLANInterfaceSettings(useWireless bool) (InterfaceSettings, error)
 	GetLocalSystemAccount() (LocalSystemAccount, error)
-	InitiateLMS()
 }
 
 func ANSI2String(ansi pthi.AMTANSIString) string {
@@ -353,9 +323,4 @@ func (amt Command) GetLocalSystemAccount() (LocalSystemAccount, error) {
 	}
 
 	return lsa, nil
-}
-
-// InitiateLMS ...
-func (amt Command) InitiateLMS() {
-	C.main_micro_lms()
 }
