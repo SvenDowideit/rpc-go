@@ -21,6 +21,16 @@ func TestGetGUID(t *testing.T) {
 	assert.NotEmpty(t, result)
 }
 
+func TestGetCodeVersions(t *testing.T) {
+	pthi := PTHICommand{}
+	err := pthi.heci.Init()
+	defer pthi.Close()
+	assert.NoError(t, err)
+	result, err := pthi.GetCodeVersions()
+	assert.NoError(t, err)
+	assert.Empty(t, result)
+
+}
 func TestGetDNSSuffixV2(t *testing.T) {
 	pthi := PTHICommand{}
 	err := pthi.heci.Init()
@@ -29,7 +39,7 @@ func TestGetDNSSuffixV2(t *testing.T) {
 	result, err := pthi.GetDNSSuffix()
 
 	assert.NoError(t, err)
-	assert.NotEmpty(t, result)
+	assert.Empty(t, result)
 
 }
 

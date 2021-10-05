@@ -15,6 +15,7 @@ import (
 	"os"
 	"syscall"
 	"unsafe"
+
 	"golang.org/x/sys/unix"
 )
 
@@ -64,7 +65,7 @@ func (heci *Heci) Init() error {
 	if err != nil {
 		return err
 	}
-  
+
 	heci.bufferSize = t.MaxMessageLength
 
 	return nil

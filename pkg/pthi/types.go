@@ -120,10 +120,25 @@ const STOP_CONFIGURATION_RESPONSE = 0x480005e
 const GET_UUID_REQUEST = 0x400005c
 const GET_UUID_RESPONSE = 0x480005c
 
+type AMTUnicodeString struct {
+	Length uint16
+	String [UNICODE_STRING_LEN]uint8
+}
+type AMTVersionType struct {
+	Description AMTUnicodeString
+	Version     AMTUnicodeString
+}
+
 type Version struct {
 	MajorNumber uint8
 	MinorNumber uint8
 }
+type CodeVersions struct {
+	BiosVersion   [BIOS_VERSION_LEN]uint8
+	VersionsCount uint32
+	Versions      [VERSIONS_NUMBER]AMTVersionType
+}
+
 type CommandFormat struct {
 	val uint32
 	// fields [3]uint32
@@ -139,8 +154,8 @@ type ResponseMessageHeader struct {
 	Status uint32
 }
 type GetCodeVersionsResponse struct {
-	Header      MessageHeader
-	CodeVersion Version
+	Header      ResponseMessageHeader
+	CodeVersion CodeVersions
 }
 type GetPKIFQDNSuffixRequest struct {
 	Header MessageHeader

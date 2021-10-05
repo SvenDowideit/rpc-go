@@ -15,13 +15,16 @@ type PTHICommand struct {
 	heci heci.Heci
 }
 
-func NewPTHICommand() PTHICommand {
+func NewPTHICommand() (*PTHICommand, error) {
 	heci := heci.Heci{}
 
-	heci.Init()
-	return PTHICommand{
-		heci: heci,
+	err := heci.Init()
+	if err != nil {
+		return nil, err
 	}
+	return &PTHICommand{
+		heci: heci,
+	}, nil
 }
 func (pthi *PTHICommand) Close() {
 	pthi.heci.Close()
@@ -47,6 +50,7 @@ func (pthi *PTHICommand) Call(command []byte, commandSize uint32) (result []byte
 	}
 	return readBuffer, nil
 }
+
 func CreateRequestHeader(command uint32, length uint32) MessageHeader {
 	return MessageHeader{
 		Version: Version{
@@ -59,6 +63,28 @@ func CreateRequestHeader(command uint32, length uint32) MessageHeader {
 		},
 		Length: length,
 	}
+}
+func (pthi *PTHICommand) GetCodeVersions() (GetCodeVersionsResponse, error) {
+	commandSize := (uint32)(12)
+	command := GetUUIDRequest{
+		Header: CreateRequestHeader(CODE_VERSIONS_REQUEST, 0),
+	}
+	var bin_buf bytes.Buffer
+	binary.Write(&bin_buf, binary.LittleEndian, command)
+	result, err := pthi.Call(bin_buf.Bytes(), commandSize)
+	if err != nil {
+		return GetCodeVersionsResponse{}, err
+	}
+	buf2 := bytes.NewBuffer(result)
+	response := GetCodeVersionsResponse{
+		Header: readHeaderResponse(buf2),
+	}
+	binary.Read(buf2, binary.LittleEndian, &response.CodeVersion)
+	// binary.Read(buf2, binary.LittleEndian, &response.CodeVersion.BiosVersion)
+	// binary.Read(buf2, binary.LittleEndian, &response.CodeVersion.VersionsCount)
+	// binary.Read(buf2, binary.LittleEndian, &response.CodeVersion.Versions)
+
+	return response, nil
 }
 
 func (pthi *PTHICommand) GetUUID() (uuid string, err error) {
@@ -225,7 +251,7 @@ func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAc
 func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface GetLANInterfaceSettingsResponse, err error) {
 	commandSize := (uint32)(16)
 	command := GetLANInterfaceSettingsRequest{
-		Header: CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST, 4),
+		Header:         CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST, 4),
 		InterfaceIndex: 0,
 	}
 	if useWireless {

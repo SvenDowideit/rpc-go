@@ -12,58 +12,58 @@ import (
 
 func TestGetGUID(t *testing.T) {
 	amt := Command{}
-	result, err := amt.GetUUIDV2()
+	result, err := amt.GetUUID()
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
 }
 
 func TestGetControlmode(t *testing.T) {
 	amt := Command{}
-	result, err := amt.GetControlModeV2()
+	result, err := amt.GetControlMode()
 	assert.NoError(t, err)
 	assert.NotEqual(t, -1, result)
 }
 
 func TestGetDNSSuffix(t *testing.T) {
 	amt := Command{}
-	result, err := amt.GetDNSSuffixV2()
+	result, err := amt.GetDNSSuffix()
 	assert.NoError(t, err)
 	assert.NotEqual(t, -1, result)
 }
 
-func TestGetCertificateHashesV2(t *testing.T) {
+func TestGetCertificateHashes(t *testing.T) {
 	amt := Command{}
-	result, err := amt.GetCertificateHashesV2()
+	result, err := amt.GetCertificateHashes()
 	assert.NoError(t, err)
 	assert.NotEqual(t, -1, result)
 }
 
-func TestGetRemoteAccessConnectionStatusV2(t *testing.T) {
+func TestGetRemoteAccessConnectionStatus(t *testing.T) {
 	amt := Command{}
-	result, err := amt.GetRemoteAccessConnectionStatusV2()
+	result, err := amt.GetRemoteAccessConnectionStatus()
 	assert.NoError(t, err)
 	assert.NotEqual(t, -1, result)
 }
 
-func TestGetLANInterfaceSettingsV2True(t *testing.T) {
+func TestGetLANInterfaceSettingsTrue(t *testing.T) {
 	amt := Command{}
-	result, err := amt.GetLANInterfaceSettingsV2(true)
+	result, err := amt.GetLANInterfaceSettings(true)
 	assert.NoError(t, err)
 	assert.NotEqual(t, -1, result)
 }
 
-func TestGetLANInterfaceSettingsV2False(t *testing.T) {
+func TestGetLANInterfaceSettingsFalse(t *testing.T) {
 	amt := Command{}
-	result, err := amt.GetLANInterfaceSettingsV2(false)
+	result, err := amt.GetLANInterfaceSettings(false)
 	assert.NoError(t, err)
 	assert.NotEqual(t, -1, result)
 }
 
-func TestGetLocalSystemAccountV2(t *testing.T) {
+func TestGetLocalSystemAccount(t *testing.T) {
 	amt := Command{}
-	result, err := amt.GetLocalSystemAccountV2()
+	result, err := amt.GetLocalSystemAccount()
 	assert.NoError(t, err)
 	assert.NotEqual(t, -1, result)
 }
 
-// sudo /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashesV2$ rpc/internal/amt
+// sudo /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashes$ rpc/internal/amt
