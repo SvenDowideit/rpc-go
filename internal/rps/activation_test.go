@@ -13,53 +13,38 @@ import (
 )
 
 // Mock the AMT Hardware
-type MockAMT struct{}
+type MockCommands struct{}
 
 var mebxDNSSuffix string
 
-func (c MockAMT) Initialize() (bool, error) {
+func (c MockCommands) Initialize() (bool, error) {
 	return true, nil
 }
-func (c MockAMT) GetVersionDataFromME(key string) (string, error) { return "Version", nil }
-func (c MockAMT) GetUUID() (string, error)                        { return "123-456-789", nil }
-func (c MockAMT) GetUUIDV2() (string, error)                      { return "", nil }
-func (c MockAMT) GetControlMode() (int, error)                    { return 1, nil }
-func (c MockAMT) GetControlModeV2() (int, error)                  { return 1, nil }
-func (c MockAMT) GetOSDNSSuffix() (string, error)                 { return "osdns", nil }
-func (c MockAMT) GetDNSSuffix() (string, error)                   { return mebxDNSSuffix, nil }
-func (c MockAMT) GetDNSSuffixV2() (string, error)                 { return mebxDNSSuffix, nil }
-func (c MockAMT) GetCertificateHashesV2() ([]amt.CertHashEntry, error) {
+func (c MockCommands) GetVersionDataFromME(key string) (string, error) { return "Version", nil }
+func (c MockCommands) GetUUID() (string, error)                        { return "123-456-789", nil }
+func (c MockCommands) GetControlMode() (int, error)                    { return 1, nil }
+func (c MockCommands) GetOSDNSSuffix() (string, error)                 { return "osdns", nil }
+func (c MockCommands) GetDNSSuffix() (string, error)                   { return mebxDNSSuffix, nil }
+func (c MockCommands) GetCertificateHashes() ([]amt.CertHashEntry, error) {
 	return []amt.CertHashEntry{}, nil
 }
-func (c MockAMT) GetCertificateHashes() ([]amt.CertHashEntry, error) {
-	return []amt.CertHashEntry{}, nil
-}
-func (c MockAMT) GetRemoteAccessConnectionStatus() (amt.RemoteAccessStatus, error) {
+func (c MockCommands) GetRemoteAccessConnectionStatus() (amt.RemoteAccessStatus, error) {
 	return amt.RemoteAccessStatus{}, nil
 }
-func (c MockAMT) GetRemoteAccessConnectionStatusV2() (amt.RemoteAccessStatus, error) {
-	return amt.RemoteAccessStatus{}, nil
-}
-func (c MockAMT) GetLANInterfaceSettings(useWireless bool) (amt.InterfaceSettings, error) {
+func (c MockCommands) GetLANInterfaceSettings(useWireless bool) (amt.InterfaceSettings, error) {
 	return amt.InterfaceSettings{}, nil
 }
-func (c MockAMT) GetLANInterfaceSettingsV2(useWireless bool) (amt.InterfaceSettings, error) {
-	return amt.InterfaceSettings{}, nil
-}
-func (c MockAMT) GetLocalSystemAccount() (amt.LocalSystemAccount, error) {
-	return amt.LocalSystemAccount{Username: "Username", Password: "Password"}, nil
-}
-func (c MockAMT) GetLocalSystemAccountV2() (amt.LocalSystemAccount, error) {
+func (c MockCommands) GetLocalSystemAccount() (amt.LocalSystemAccount, error) {
 	return amt.LocalSystemAccount{Username: "Username", Password: "Password"}, nil
 }
 
 var p Payload
 
-func (c MockAMT) InitiateLMS() {}
+func (c MockCommands) InitiateLMS() {}
 
 func init() {
 	p = Payload{}
-	p.AMT = MockAMT{}
+	p.AMT = MockCommands{}
 }
 func TestCreatePayload(t *testing.T) {
 	mebxDNSSuffix = "mebxdns"

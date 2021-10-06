@@ -28,7 +28,7 @@ func TestGetCodeVersions(t *testing.T) {
 	assert.NoError(t, err)
 	result, err := pthi.GetCodeVersions()
 	assert.NoError(t, err)
-	assert.Empty(t, result)
+	assert.NotEmpty(t, result)
 
 }
 func TestGetDNSSuffixV2(t *testing.T) {

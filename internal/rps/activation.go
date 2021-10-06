@@ -13,7 +13,7 @@ import (
 )
 
 type Payload struct {
-	AMT amt.AMT
+	AMT amt.AMTInfoCommands
 }
 
 // Activation is used for tranferring messages between RPS and RPC

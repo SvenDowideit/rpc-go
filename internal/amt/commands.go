@@ -69,7 +69,7 @@ type LocalSystemAccount struct {
 	Password string
 }
 
-type AMT interface {
+type AMTInfoCommands interface {
 	Initialize() (bool, error)
 	GetVersionDataFromME(key string) (string, error)
 	GetUUID() (string, error)
