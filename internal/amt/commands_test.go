@@ -10,6 +10,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type MockPTHICommands struct {}
+
+func (c MockPTHICommands) GetUUID() (string, error) { return "houwdy", nil }
+
+
+
+// Mocked Tests
+
+
+// Hardware Tests
 func TestGetGUID(t *testing.T) {
 	amt := Command{}
 	result, err := amt.GetUUID()
@@ -65,5 +75,3 @@ func TestGetLocalSystemAccount(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEqual(t, -1, result)
 }
-
-// sudo /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashes$ rpc/internal/amt
