@@ -5,6 +5,7 @@
 package amt
 
 import (
+	"rpc/pkg/pthi"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,11 +13,29 @@ import (
 
 type MockPTHICommands struct {}
 
-func (c MockPTHICommands) GetUUID() (string, error) { return "\xd2?\x11\x1c%3\x94E\xa2rT\xb2\x03\x8b\xeb\a" , nil }
+func (c MockPTHICommands) NewPTHICommand() (pthi.PTHIInfoCommands, error) {return MockPTHICommands{}, nil}
+func (c MockPTHICommands) Close() {}
+func (c MockPTHICommands) Call(command []byte, commandSize uint32) (result []byte, err error) {return nil, nil}
+func (c MockPTHICommands) GetCodeVersions() (pthi.GetCodeVersionsResponse, error) {return pthi.GetCodeVersionsResponse{}, nil}
+func (c MockPTHICommands) GetUUID() (uuid string, err error) { return "\xd2?\x11\x1c%3\x94E\xa2rT\xb2\x03\x8b\xeb\a" , nil }
+func (c MockPTHICommands) GetControlMode() (state int, err error) {return 0, nil}
+func (c MockPTHICommands) GetDNSSuffix() (suffix string, err error) {return "test", nil}
+func (c MockPTHICommands) GetCertificateHashes() (hashEntryList []pthi.CertHashEntry, err error) {return []pthi.CertHashEntry{}, nil}
+func (c MockPTHICommands) GetRemoteAccessConnectionStatus() (RAStatus pthi.GetRemoteAccessConnectionStatusResponse, err error) {
+	return pthi.GetRemoteAccessConnectionStatusResponse{}, nil
+}
+func (c MockPTHICommands) GetLANInterfaceSettings(useWireless bool) (LANInterface pthi.GetLANInterfaceSettingsResponse, err error) {
+	return pthi.GetLANInterfaceSettingsResponse{}, nil
+}
+func (c MockPTHICommands) GetLocalSystemAccount() (localAccount pthi.GetLocalSystemAccountResponse, err error) {
+	return pthi.GetLocalSystemAccountResponse{}, nil
+}
+
+
 
 func init() {
-	//amt := Command{}
-	//amt.PTHI = MockPTHICommands{}
+	amt := Command{}
+	amt.PTHI = MockPTHICommands{}
 }
 
 // Mocked Tests

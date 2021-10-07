@@ -15,24 +15,38 @@ type PTHICommand struct {
 	heci heci.Heci
 }
 
-func (pthi *PTHICommand) NewPTHICommand() (*PTHICommand, error) {
+type PTHIInfoCommands interface {
+	NewPTHICommand() (PTHIInfoCommands, error)
+	Close()
+	Call(command []byte, commandSize uint32) (result []byte, err error)
+	GetCodeVersions() (GetCodeVersionsResponse, error)
+	GetUUID() (uuid string, err error)
+	GetControlMode() (state int, err error)
+	GetDNSSuffix() (suffix string, err error)
+	GetCertificateHashes() (hashEntryList []CertHashEntry, err error)
+	GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAccessConnectionStatusResponse, err error)
+	GetLANInterfaceSettings(useWireless bool) (LANInterface GetLANInterfaceSettingsResponse, err error)
+	GetLocalSystemAccount() (localAccount GetLocalSystemAccountResponse, err error)
+}
+
+func (pthi PTHICommand) NewPTHICommand() (PTHIInfoCommands, error) {
 	heci := heci.Heci{}
 
 	err := heci.Init()
 	if err != nil {
 		emptyCommand := PTHICommand{}
-		return &emptyCommand, err
+		return emptyCommand, err
 	}
-	return &PTHICommand{
+	return PTHICommand{
 		heci: heci,
 	}, nil
 }
 
-func (pthi *PTHICommand) Close() {
+func (pthi PTHICommand) Close() {
 	pthi.heci.Close()
 }
 
-func (pthi *PTHICommand) Call(command []byte, commandSize uint32) (result []byte, err error) {
+func (pthi PTHICommand) Call(command []byte, commandSize uint32) (result []byte, err error) {
 	size := pthi.heci.GetBufferSize()
 
 	bytesWritten, err := pthi.heci.SendMessage(command, &commandSize)
@@ -68,7 +82,7 @@ func CreateRequestHeader(command uint32, length uint32) MessageHeader {
 	}
 }
 
-func (pthi *PTHICommand) GetCodeVersions() (GetCodeVersionsResponse, error) {
+func (pthi PTHICommand) GetCodeVersions() (GetCodeVersionsResponse, error) {
 	commandSize := (uint32)(12)
 	command := GetUUIDRequest{
 		Header: CreateRequestHeader(CODE_VERSIONS_REQUEST, 0),
@@ -91,7 +105,7 @@ func (pthi *PTHICommand) GetCodeVersions() (GetCodeVersionsResponse, error) {
 	return response, nil
 }
 
-func (pthi *PTHICommand) GetUUID() (uuid string, err error) {
+func (pthi PTHICommand) GetUUID() (uuid string, err error) {
 	commandSize := (uint32)(12) //(uint32)(unsafe.Sizeof(GetUUIDRequest{}))
 	command := GetUUIDRequest{
 		Header: CreateRequestHeader(GET_UUID_REQUEST, 0),
@@ -112,7 +126,7 @@ func (pthi *PTHICommand) GetUUID() (uuid string, err error) {
 	return string(([]byte)(response.UUID[:])), nil
 }
 
-func (pthi *PTHICommand) GetControlMode() (state int, err error) {
+func (pthi PTHICommand) GetControlMode() (state int, err error) {
 	commandSize := (uint32)(12)
 	command := GetControlModeRequest{
 		Header: CreateRequestHeader(GET_CONTROL_MODE_REQUEST, 0),
@@ -147,7 +161,7 @@ func readHeaderResponse(header *bytes.Buffer) ResponseMessageHeader {
 	return response
 }
 
-func (pthi *PTHICommand) GetDNSSuffix() (suffix string, err error) {
+func (pthi PTHICommand) GetDNSSuffix() (suffix string, err error) {
 	commandSize := (uint32)(12)
 	command := GetPKIFQDNSuffixRequest{
 		Header: CreateRequestHeader(GET_PKI_FQDN_SUFFIX_REQUEST, 0),
@@ -173,7 +187,7 @@ func (pthi *PTHICommand) GetDNSSuffix() (suffix string, err error) {
 	return "", nil
 }
 
-func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, err error) {
+func (pthi PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, err error) {
 	// Enumerate a list of hash handles to request from
 	enumerateCommandSize := (uint32)(12)
 	enumerateCommand := GetHashHandlesRequest{
@@ -226,7 +240,7 @@ func (pthi *PTHICommand) GetCertificateHashes() (hashEntryList []CertHashEntry, 
 	return hashEntryList, nil
 }
 
-func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAccessConnectionStatusResponse, err error) {
+func (pthi PTHICommand) GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAccessConnectionStatusResponse, err error) {
 	commandSize := (uint32)(12)
 	command := GetRemoteAccessConnectionStatusRequest{
 		Header: CreateRequestHeader(GET_REMOTE_ACCESS_CONNECTION_STATUS_REQUEST, 0),
@@ -252,7 +266,7 @@ func (pthi *PTHICommand) GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAc
 	return response, nil
 }
 
-func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface GetLANInterfaceSettingsResponse, err error) {
+func (pthi PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface GetLANInterfaceSettingsResponse, err error) {
 	commandSize := (uint32)(16)
 	command := GetLANInterfaceSettingsRequest{
 		Header:         CreateRequestHeader(GET_LAN_INTERFACE_SETTINGS_REQUEST, 4),
@@ -283,7 +297,7 @@ func (pthi *PTHICommand) GetLANInterfaceSettings(useWireless bool) (LANInterface
 	return response, nil
 }
 
-func (pthi *PTHICommand) GetLocalSystemAccount() (localAccount GetLocalSystemAccountResponse, err error) {
+func (pthi PTHICommand) GetLocalSystemAccount() (localAccount GetLocalSystemAccountResponse, err error) {
 	commandSize := (uint32)(52)
 	command := GetLocalSystemAccountRequest{
 		Header: CreateRequestHeader(GET_LOCAL_SYSTEM_ACCOUNT_REQUEST, 40),

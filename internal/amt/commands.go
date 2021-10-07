@@ -92,7 +92,7 @@ func ANSI2String(ansi pthi.AMTANSIString) string {
 }
 
 type Command struct {
-	PTHI pthi.PTHICommand
+	PTHI pthi.PTHIInfoCommands
 }
 
 // Initialize determines if rpc is able to initialize the heci driver
