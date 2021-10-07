@@ -92,12 +92,13 @@ func ANSI2String(ansi pthi.AMTANSIString) string {
 }
 
 type Command struct {
+	PTHI pthi.PTHICommand
 }
 
 // Initialize determines if rpc is able to initialize the heci driver
 func (amt Command) Initialize() (bool, error) {
 	// initialize HECI interface
-	pthi, err := pthi.NewPTHICommand()
+	pthi, err := amt.PTHI.NewPTHICommand()
 	if err != nil {
 		return false, errors.New("unable to initialize")
 	}
@@ -107,7 +108,7 @@ func (amt Command) Initialize() (bool, error) {
 
 // GetVersionDataFromME ...
 func (amt Command) GetVersionDataFromME(key string) (string, error) {
-	pthi, _ := pthi.NewPTHICommand()
+	pthi, _ := amt.PTHI.NewPTHICommand()
 	defer pthi.Close()
 	result, err := pthi.GetCodeVersions()
 	if err != nil {
@@ -125,7 +126,7 @@ func (amt Command) GetVersionDataFromME(key string) (string, error) {
 
 // GetUUID ...
 func (amt Command) GetUUID() (string, error) {
-	pthi, _ := pthi.NewPTHICommand()
+	pthi, _ := amt.PTHI.NewPTHICommand()
 	defer pthi.Close()
 	result, err := pthi.GetUUID()
 	if err != nil {
@@ -149,7 +150,7 @@ func (amt Command) GetUUID() (string, error) {
 
 // GetControlMode ...
 func (amt Command) GetControlMode() (int, error) {
-	pthi, _ := pthi.NewPTHICommand()
+	pthi, _ := amt.PTHI.NewPTHICommand()
 	defer pthi.Close()
 	result, err := pthi.GetControlMode()
 	if err != nil {
@@ -188,7 +189,7 @@ func (amt Command) GetOSDNSSuffix() (string, error) {
 }
 
 func (amt Command) GetDNSSuffix() (string, error) {
-	pthi, _ := pthi.NewPTHICommand()
+	pthi, _ := amt.PTHI.NewPTHICommand()
 	defer pthi.Close()
 	result, err := pthi.GetDNSSuffix()
 	if err != nil {
@@ -199,7 +200,7 @@ func (amt Command) GetDNSSuffix() (string, error) {
 }
 
 func (amt Command) GetCertificateHashes() ([]CertHashEntry, error) {
-	pthi, _ := pthi.NewPTHICommand()
+	pthi, _ := amt.PTHI.NewPTHICommand()
 	defer pthi.Close()
 
 	pthiEntryList, err := pthi.GetCertificateHashes()
@@ -233,7 +234,7 @@ func (amt Command) GetCertificateHashes() ([]CertHashEntry, error) {
 }
 
 func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error) {
-	pthi, _ := pthi.NewPTHICommand()
+	pthi, _ := amt.PTHI.NewPTHICommand()
 	defer pthi.Close()
 	result, err := pthi.GetRemoteAccessConnectionStatus()
 	if err != nil {
@@ -252,7 +253,7 @@ func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
 }
 
 func (amt Command) GetLANInterfaceSettings(useWireless bool) (InterfaceSettings, error) {
-	pthi, _ := pthi.NewPTHICommand()
+	pthi, _ := amt.PTHI.NewPTHICommand()
 	defer pthi.Close()
 	result, err := pthi.GetLANInterfaceSettings(useWireless)
 	if err != nil {
@@ -295,7 +296,7 @@ func (amt Command) GetLANInterfaceSettings(useWireless bool) (InterfaceSettings,
 }
 
 func (amt Command) GetLocalSystemAccount() (LocalSystemAccount, error) {
-	pthi, _ := pthi.NewPTHICommand()
+	pthi, _ := amt.PTHI.NewPTHICommand()
 	defer pthi.Close()
 	result, err := pthi.GetLocalSystemAccount()
 	if err != nil {

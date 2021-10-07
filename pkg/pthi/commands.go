@@ -15,20 +15,23 @@ type PTHICommand struct {
 	heci heci.Heci
 }
 
-func NewPTHICommand() (*PTHICommand, error) {
+func (pthi *PTHICommand) NewPTHICommand() (*PTHICommand, error) {
 	heci := heci.Heci{}
 
 	err := heci.Init()
 	if err != nil {
-		return nil, err
+		emptyCommand := PTHICommand{}
+		return &emptyCommand, err
 	}
 	return &PTHICommand{
 		heci: heci,
 	}, nil
 }
+
 func (pthi *PTHICommand) Close() {
 	pthi.heci.Close()
 }
+
 func (pthi *PTHICommand) Call(command []byte, commandSize uint32) (result []byte, err error) {
 	size := pthi.heci.GetBufferSize()
 
@@ -64,6 +67,7 @@ func CreateRequestHeader(command uint32, length uint32) MessageHeader {
 		Length: length,
 	}
 }
+
 func (pthi *PTHICommand) GetCodeVersions() (GetCodeVersionsResponse, error) {
 	commandSize := (uint32)(12)
 	command := GetUUIDRequest{

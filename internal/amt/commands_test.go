@@ -12,12 +12,20 @@ import (
 
 type MockPTHICommands struct {}
 
-func (c MockPTHICommands) GetUUID() (string, error) { return "houwdy", nil }
+func (c MockPTHICommands) GetUUID() (string, error) { return "\xd2?\x11\x1c%3\x94E\xa2rT\xb2\x03\x8b\xeb\a" , nil }
 
-
+func init() {
+	//amt := Command{}
+	//amt.PTHI = MockPTHICommands{}
+}
 
 // Mocked Tests
-
+func MockedTestGetGUID(t *testing.T) {
+	amt := Command{}
+	result, err := amt.GetUUID()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
+}
 
 // Hardware Tests
 func TestGetGUID(t *testing.T) {
