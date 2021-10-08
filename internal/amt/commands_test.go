@@ -13,7 +13,8 @@ import (
 
 type MockPTHICommands struct {}
 
-func (c MockPTHICommands) NewPTHICommand() (pthi.PTHIInfoCommands, error) {return MockPTHICommands{}, nil}
+func (c MockPTHICommands) NewPTHICommand() (*MockPTHICommands, error) {return &MockPTHICommands{}, nil}
+func (c MockPTHICommands) Open() error { return nil }
 func (c MockPTHICommands) Close() {}
 func (c MockPTHICommands) Call(command []byte, commandSize uint32) (result []byte, err error) {return nil, nil}
 func (c MockPTHICommands) GetCodeVersions() (pthi.GetCodeVersionsResponse, error) {return pthi.GetCodeVersionsResponse{}, nil}
@@ -31,7 +32,7 @@ func (c MockPTHICommands) GetLocalSystemAccount() (localAccount pthi.GetLocalSys
 	return pthi.GetLocalSystemAccountResponse{}, nil
 }
 
-
+var amt Command
 
 func init() {
 	amt := Command{}
@@ -40,7 +41,6 @@ func init() {
 
 // Mocked Tests
 func MockedTestGetGUID(t *testing.T) {
-	amt := Command{}
 	result, err := amt.GetUUID()
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)

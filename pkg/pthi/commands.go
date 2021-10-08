@@ -16,7 +16,7 @@ type PTHICommand struct {
 }
 
 type PTHIInfoCommands interface {
-	NewPTHICommand() (PTHIInfoCommands, error)
+	Open() error
 	Close()
 	Call(command []byte, commandSize uint32) (result []byte, err error)
 	GetCodeVersions() (GetCodeVersionsResponse, error)
@@ -29,17 +29,18 @@ type PTHIInfoCommands interface {
 	GetLocalSystemAccount() (localAccount GetLocalSystemAccountResponse, err error)
 }
 
-func (pthi PTHICommand) NewPTHICommand() (PTHIInfoCommands, error) {
-	heci := heci.Heci{}
-
-	err := heci.Init()
-	if err != nil {
-		emptyCommand := PTHICommand{}
-		return emptyCommand, err
-	}
+func NewPTHICommand() (PTHICommand) {
 	return PTHICommand{
-		heci: heci,
-	}, nil
+		heci: heci.Heci{},
+	}
+}
+
+func (pthi PTHICommand) Open() error {
+	err := pthi.heci.Init()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (pthi PTHICommand) Close() {

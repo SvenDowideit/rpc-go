@@ -95,22 +95,34 @@ type Command struct {
 	PTHI pthi.PTHIInfoCommands
 }
 
+func NewCommand() Command {
+	return Command {
+		PTHI: pthi.NewPTHICommand(),
+	}
+}
+
+// var s amt.PTHI.PTHIInfoCommands
+
 // Initialize determines if rpc is able to initialize the heci driver
 func (amt Command) Initialize() (bool, error) {
 	// initialize HECI interface
-	pthi, err := amt.PTHI.NewPTHICommand()
+	err := amt.PTHI.Open()
 	if err != nil {
 		return false, errors.New("unable to initialize")
 	}
-	defer pthi.Close()
+	defer amt.PTHI.Close()
 	return true, nil
 }
 
 // GetVersionDataFromME ...
 func (amt Command) GetVersionDataFromME(key string) (string, error) {
-	pthi, _ := amt.PTHI.NewPTHICommand()
-	defer pthi.Close()
-	result, err := pthi.GetCodeVersions()
+
+	err := amt.PTHI.Open()
+	if err != nil {
+		return "", nil
+	}
+	defer amt.PTHI.Close()
+	result, err := amt.PTHI.GetCodeVersions()
 	if err != nil {
 		return "", err
 	}
@@ -126,9 +138,12 @@ func (amt Command) GetVersionDataFromME(key string) (string, error) {
 
 // GetUUID ...
 func (amt Command) GetUUID() (string, error) {
-	pthi, _ := amt.PTHI.NewPTHICommand()
-	defer pthi.Close()
-	result, err := pthi.GetUUID()
+	err := amt.PTHI.Open()
+	if err != nil {
+		return "", nil
+	}
+	defer amt.PTHI.Close()
+	result, err := amt.PTHI.GetUUID()
 	if err != nil {
 		return "", err
 	}
@@ -150,9 +165,12 @@ func (amt Command) GetUUID() (string, error) {
 
 // GetControlMode ...
 func (amt Command) GetControlMode() (int, error) {
-	pthi, _ := amt.PTHI.NewPTHICommand()
-	defer pthi.Close()
-	result, err := pthi.GetControlMode()
+	err := amt.PTHI.Open()
+	if err != nil {
+		return -1, nil
+	}
+	defer amt.PTHI.Close()
+	result, err := amt.PTHI.GetControlMode()
 	if err != nil {
 		return -1, err
 	}
@@ -189,9 +207,12 @@ func (amt Command) GetOSDNSSuffix() (string, error) {
 }
 
 func (amt Command) GetDNSSuffix() (string, error) {
-	pthi, _ := amt.PTHI.NewPTHICommand()
-	defer pthi.Close()
-	result, err := pthi.GetDNSSuffix()
+	err := amt.PTHI.Open()
+	if err != nil {
+		return "", nil
+	}
+	defer amt.PTHI.Close()
+	result, err := amt.PTHI.GetDNSSuffix()
 	if err != nil {
 		return "", err
 	}
@@ -200,11 +221,13 @@ func (amt Command) GetDNSSuffix() (string, error) {
 }
 
 func (amt Command) GetCertificateHashes() ([]CertHashEntry, error) {
-	pthi, _ := amt.PTHI.NewPTHICommand()
-	defer pthi.Close()
-
-	pthiEntryList, err := pthi.GetCertificateHashes()
+	err := amt.PTHI.Open()
 	amtEntryList := []CertHashEntry{}
+	if err != nil {
+		return amtEntryList, nil
+	}
+	defer amt.PTHI.Close()
+	pthiEntryList, err := amt.PTHI.GetCertificateHashes()
 	if err != nil {
 		return amtEntryList, err
 	}
@@ -234,11 +257,14 @@ func (amt Command) GetCertificateHashes() ([]CertHashEntry, error) {
 }
 
 func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error) {
-	pthi, _ := amt.PTHI.NewPTHICommand()
-	defer pthi.Close()
-	result, err := pthi.GetRemoteAccessConnectionStatus()
+	err := amt.PTHI.Open()
+	emptyRAStatus := RemoteAccessStatus{}
 	if err != nil {
-		emptyRAStatus := RemoteAccessStatus{}
+		return emptyRAStatus, nil
+	}
+	defer amt.PTHI.Close()
+	result, err := amt.PTHI.GetRemoteAccessConnectionStatus()
+	if err != nil {
 		return emptyRAStatus, err
 	}
 
@@ -253,11 +279,14 @@ func (amt Command) GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
 }
 
 func (amt Command) GetLANInterfaceSettings(useWireless bool) (InterfaceSettings, error) {
-	pthi, _ := amt.PTHI.NewPTHICommand()
-	defer pthi.Close()
-	result, err := pthi.GetLANInterfaceSettings(useWireless)
+	err := amt.PTHI.Open()
+	emptySettings := InterfaceSettings{}
 	if err != nil {
-		emptySettings := InterfaceSettings{}
+		return emptySettings, nil
+	}
+	defer amt.PTHI.Close()
+	result, err := amt.PTHI.GetLANInterfaceSettings(useWireless)
+	if err != nil {
 		return emptySettings, err
 	}
 
@@ -296,11 +325,14 @@ func (amt Command) GetLANInterfaceSettings(useWireless bool) (InterfaceSettings,
 }
 
 func (amt Command) GetLocalSystemAccount() (LocalSystemAccount, error) {
-	pthi, _ := amt.PTHI.NewPTHICommand()
-	defer pthi.Close()
-	result, err := pthi.GetLocalSystemAccount()
+	err := amt.PTHI.Open()
+	emptySystemAccount := LocalSystemAccount{}
 	if err != nil {
-		emptySystemAccount := LocalSystemAccount{}
+		return emptySystemAccount, nil
+	}
+	defer amt.PTHI.Close()
+	result, err := amt.PTHI.GetLocalSystemAccount()
+	if err != nil {
 		return emptySystemAccount, err
 	}
 
