@@ -13,7 +13,6 @@ import (
 
 type MockPTHICommands struct {}
 
-func (c MockPTHICommands) NewPTHICommand() (*MockPTHICommands, error) {return &MockPTHICommands{}, nil}
 func (c MockPTHICommands) Open() error { return nil }
 func (c MockPTHICommands) Close() {}
 func (c MockPTHICommands) Call(command []byte, commandSize uint32) (result []byte, err error) {return nil, nil}
@@ -35,20 +34,14 @@ func (c MockPTHICommands) GetLocalSystemAccount() (localAccount pthi.GetLocalSys
 var amt Command
 
 func init() {
-	amt := Command{}
+	amt = Command{}
 	amt.PTHI = MockPTHICommands{}
 }
 
-// Mocked Tests
-func MockedTestGetGUID(t *testing.T) {
-	result, err := amt.GetUUID()
-	assert.NoError(t, err)
-	assert.NotEmpty(t, result)
-}
-
-// Hardware Tests
+// Tests
 func TestGetGUID(t *testing.T) {
-	amt := Command{}
+	// amt = Command{}
+	// amt.PTHI = MockPTHICommands{}
 	result, err := amt.GetUUID()
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)

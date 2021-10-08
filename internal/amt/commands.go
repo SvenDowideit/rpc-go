@@ -101,8 +101,6 @@ func NewCommand() Command {
 	}
 }
 
-// var s amt.PTHI.PTHIInfoCommands
-
 // Initialize determines if rpc is able to initialize the heci driver
 func (amt Command) Initialize() (bool, error) {
 	// initialize HECI interface
