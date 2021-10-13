@@ -12,7 +12,7 @@ import (
 )
 
 type PTHICommand struct {
-	heci heci.Heci
+	heci *heci.Driver
 }
 
 type PTHIInfoCommands interface {
@@ -29,9 +29,9 @@ type PTHIInfoCommands interface {
 	GetLocalSystemAccount() (localAccount GetLocalSystemAccountResponse, err error)
 }
 
-func NewPTHICommand() (PTHICommand) {
+func NewPTHICommand() PTHICommand {
 	return PTHICommand{
-		heci: heci.Heci{},
+		heci: &heci.Driver{},
 	}
 }
 

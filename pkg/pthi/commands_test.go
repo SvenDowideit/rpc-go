@@ -11,7 +11,7 @@ import (
 )
 
 func TestGetGUID(t *testing.T) {
-	pthi := PTHICommand{}
+	pthi := NewPTHICommand()
 	err := pthi.heci.Init()
 	defer pthi.Close()
 	assert.NoError(t, err)
@@ -22,7 +22,7 @@ func TestGetGUID(t *testing.T) {
 }
 
 func TestGetCodeVersions(t *testing.T) {
-	pthi := PTHICommand{}
+	pthi := NewPTHICommand()
 	err := pthi.heci.Init()
 	defer pthi.Close()
 	assert.NoError(t, err)
@@ -32,7 +32,7 @@ func TestGetCodeVersions(t *testing.T) {
 
 }
 func TestGetDNSSuffixV2(t *testing.T) {
-	pthi := PTHICommand{}
+	pthi := NewPTHICommand()
 	err := pthi.heci.Init()
 	defer pthi.Close()
 	assert.NoError(t, err)
@@ -44,7 +44,7 @@ func TestGetDNSSuffixV2(t *testing.T) {
 }
 
 func TestGetCertificateHashes(t *testing.T) {
-	pthi := PTHICommand{}
+	pthi := NewPTHICommand()
 	err := pthi.heci.Init()
 	defer pthi.Close()
 	assert.NoError(t, err)
@@ -55,7 +55,7 @@ func TestGetCertificateHashes(t *testing.T) {
 }
 
 func TestGetRemoteAccessConnectionStatus(t *testing.T) {
-	pthi := PTHICommand{}
+	pthi := NewPTHICommand()
 	err := pthi.heci.Init()
 	defer pthi.Close()
 	assert.NoError(t, err)
@@ -66,7 +66,7 @@ func TestGetRemoteAccessConnectionStatus(t *testing.T) {
 }
 
 func TestGetLANInterfaceSettingsTrue(t *testing.T) {
-	pthi := PTHICommand{}
+	pthi := NewPTHICommand()
 	err := pthi.heci.Init()
 	defer pthi.Close()
 	assert.NoError(t, err)
@@ -77,8 +77,8 @@ func TestGetLANInterfaceSettingsTrue(t *testing.T) {
 }
 
 func TestGetLANInterfaceSettingsFalse(t *testing.T) {
-	pthi := PTHICommand{}
-	err := pthi.heci.Init()
+	pthi := NewPTHICommand()
+	err := pthi.Open()
 	defer pthi.Close()
 	assert.NoError(t, err)
 	result, err := pthi.GetLANInterfaceSettings(false)
@@ -88,7 +88,7 @@ func TestGetLANInterfaceSettingsFalse(t *testing.T) {
 }
 
 func TestGetLocalSystemAccount(t *testing.T) {
-	pthi := PTHICommand{}
+	pthi := NewPTHICommand()
 	err := pthi.heci.Init()
 	defer pthi.Close()
 	assert.NoError(t, err)

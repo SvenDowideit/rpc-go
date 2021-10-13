@@ -55,7 +55,7 @@ func (f Flags) ParseFlags() (Flags, error) {
 		println("Protocol " + utils.ProtocolVersion)
 		os.Exit(1)
 	}
-	amt := amt.Command{}
+	amt := amt.NewCommand()
 	result, err := amt.Initialize()
 	if !result || err != nil {
 		println("Unable to launch application. Please ensure that Intel ME is present, the MEI driver is installed and that this application is run with administrator or root privileges.")
@@ -114,7 +114,7 @@ func (f Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 				*amtInfoLanPtr = true
 				*amtInfoHostnamePtr = true
 			}
-			amt := amt.Command{}
+			amt := amt.NewCommand()
 			if *amtInfoVerPtr {
 				result, _ := amt.GetVersionDataFromME("AMT")
 				println("Version			: " + result)

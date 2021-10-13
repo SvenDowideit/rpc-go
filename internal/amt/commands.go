@@ -96,7 +96,7 @@ type Command struct {
 }
 
 func NewCommand() Command {
-	return Command {
+	return Command{
 		PTHI: pthi.NewPTHICommand(),
 	}
 }
