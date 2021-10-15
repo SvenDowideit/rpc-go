@@ -174,7 +174,6 @@ func (amt Command) GetControlMode() (int, error) {
 	}
 
 	return result, nil
-
 }
 
 // GetDNSSuffix ...

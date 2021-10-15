@@ -1,6 +1,3 @@
-//go:build amt
-// +build amt
-
 /*********************************************************************
  * Copyright (c) Intel Corporation 2021
  * SPDX-License-Identifier: Apache-2.0
@@ -100,5 +97,3 @@ func TestGetLocalSystemAccount(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, result)
 }
-
-// sudo /usr/local/go/bin/go test -timeout 30s -run ^TestGetCertificateHashes$ rpc/pkg/pthi
