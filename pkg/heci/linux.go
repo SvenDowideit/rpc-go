@@ -29,7 +29,6 @@ type HECIModel interface {
 	GetBufferSize() uint32
 	SendMessage(buffer []byte, done *uint32) (bytesWritten uint32, err error)
 	ReceiveMessage(buffer []byte, done *uint32) (bytesRead uint32, err error)
-	Ioctl(fd, op, arg uintptr) error
 	Close()
 }
 
@@ -54,10 +53,14 @@ type CMEIConnectClientData struct {
 	data [16]byte
 }
 
-func (heci Driver) Init(currentHeci *Driver) error {
+func NewHECICommand() *Driver {
+	return &Driver{}
+}
+
+func (heci *Driver) Init() error {
 
 	var err error
-	currentHeci.meiDevice, err = os.OpenFile(Device, syscall.O_RDWR, 0)
+	heci.meiDevice, err = os.OpenFile(Device, syscall.O_RDWR, 0)
 	if err != nil {
 		log.Println("Cannot open MEI Device")
 		return err
@@ -65,7 +68,7 @@ func (heci Driver) Init(currentHeci *Driver) error {
 
 	data := CMEIConnectClientData{}
 	data.data = MEI_IAMTHIF
-	err = Ioctl(currentHeci.meiDevice.Fd(), IOCTL_MEI_CONNECT_CLIENT, uintptr(unsafe.Pointer(&data)))
+	err = Ioctl(heci.meiDevice.Fd(), IOCTL_MEI_CONNECT_CLIENT, uintptr(unsafe.Pointer(&data)))
 	if err != nil {
 		return err
 	}
@@ -75,14 +78,14 @@ func (heci Driver) Init(currentHeci *Driver) error {
 		return err
 	}
 
-	currentHeci.bufferSize = t.MaxMessageLength
+	heci.bufferSize = t.MaxMessageLength
 
 	return nil
 }
-func (heci Driver) GetBufferSize() uint32 {
+func (heci *Driver) GetBufferSize() uint32 {
 	return heci.bufferSize
 }
-func (heci Driver) SendMessage(buffer []byte, done *uint32) (bytesWritten uint32, err error) {
+func (heci *Driver) SendMessage(buffer []byte, done *uint32) (bytesWritten uint32, err error) {
 
 	size, err := syscall.Write(int(heci.meiDevice.Fd()), buffer)
 	if err != nil {
@@ -91,7 +94,7 @@ func (heci Driver) SendMessage(buffer []byte, done *uint32) (bytesWritten uint32
 
 	return uint32(size), nil
 }
-func (heci Driver) ReceiveMessage(buffer []byte, done *uint32) (bytesRead uint32, err error) {
+func (heci *Driver) ReceiveMessage(buffer []byte, done *uint32) (bytesRead uint32, err error) {
 
 	read, err := unix.Read(int(heci.meiDevice.Fd()), buffer)
 	if err != nil {
@@ -108,6 +111,6 @@ func Ioctl(fd, op, arg uintptr) error {
 	return nil
 }
 
-func (heci Driver) Close(currentHeci *Driver) {
-	defer currentHeci.meiDevice.Close()
+func (heci *Driver) Close() {
+	defer heci.meiDevice.Close()
 }
