@@ -12,7 +12,7 @@ import (
 )
 
 type PTHICommand struct {
-	heci *heci.Driver
+	heci heci.Driver
 }
 
 type PTHIModel interface {
@@ -31,12 +31,12 @@ type PTHIModel interface {
 
 func NewPTHICommand() PTHICommand {
 	return PTHICommand{
-		heci: &heci.Driver{},
+		heci: heci.Driver{},
 	}
 }
 
 func (pthi PTHICommand) Open() error {
-	err := pthi.heci.Init()
+	err := pthi.heci.Init(&pthi.heci)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (pthi PTHICommand) Open() error {
 }
 
 func (pthi PTHICommand) Close() {
-	pthi.heci.Close()
+	pthi.heci.Close(&pthi.heci)
 }
 
 func (pthi PTHICommand) Call(command []byte, commandSize uint32) (result []byte, err error) {

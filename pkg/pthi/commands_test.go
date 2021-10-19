@@ -18,9 +18,21 @@ func (c MockHECICommands) SendMessage(buffer []byte, done *uint32) (bytesWritten
 func (c MockHECICommands) ReceiveMessage(buffer []byte, done *uint32) (bytesRead uint32, err error) { return 4, nil }
 func (c MockHECICommands) Close() {}
 
+// var pthi PTHICommand
+
+// func init() {
+// 	pthi = PTHICommand{}
+// 	pthi.heci = MockHECICommands{}
+// }
+
 func TestGetGUID(t *testing.T) {
+
+}
+
+// Hardware Tests
+func TestGetGUIDH(t *testing.T) {
 	pthi := NewPTHICommand()
-	err := pthi.heci.Init()
+	err := pthi.heci.Init(&pthi.heci)
 	defer pthi.Close()
 	assert.NoError(t, err)
 	result, err := pthi.GetUUID()
@@ -31,7 +43,7 @@ func TestGetGUID(t *testing.T) {
 
 func TestGetCodeVersions(t *testing.T) {
 	pthi := NewPTHICommand()
-	err := pthi.heci.Init()
+	err := pthi.heci.Init(&pthi.heci)
 	defer pthi.Close()
 	assert.NoError(t, err)
 	result, err := pthi.GetCodeVersions()
@@ -41,7 +53,7 @@ func TestGetCodeVersions(t *testing.T) {
 }
 func TestGetDNSSuffix(t *testing.T) {
 	pthi := NewPTHICommand()
-	err := pthi.heci.Init()
+	err := pthi.heci.Init(&pthi.heci)
 	defer pthi.Close()
 	assert.NoError(t, err)
 	result, err := pthi.GetDNSSuffix()
@@ -53,7 +65,7 @@ func TestGetDNSSuffix(t *testing.T) {
 
 func TestGetCertificateHashes(t *testing.T) {
 	pthi := NewPTHICommand()
-	err := pthi.heci.Init()
+	err := pthi.heci.Init(&pthi.heci)
 	defer pthi.Close()
 	assert.NoError(t, err)
 	result, err := pthi.GetCertificateHashes()
@@ -64,7 +76,7 @@ func TestGetCertificateHashes(t *testing.T) {
 
 func TestGetRemoteAccessConnectionStatus(t *testing.T) {
 	pthi := NewPTHICommand()
-	err := pthi.heci.Init()
+	err := pthi.heci.Init(&pthi.heci)
 	defer pthi.Close()
 	assert.NoError(t, err)
 	result, err := pthi.GetRemoteAccessConnectionStatus()
@@ -75,7 +87,7 @@ func TestGetRemoteAccessConnectionStatus(t *testing.T) {
 
 func TestGetLANInterfaceSettingsTrue(t *testing.T) {
 	pthi := NewPTHICommand()
-	err := pthi.heci.Init()
+	err := pthi.heci.Init(&pthi.heci)
 	defer pthi.Close()
 	assert.NoError(t, err)
 	result, err := pthi.GetLANInterfaceSettings(true)
@@ -97,7 +109,7 @@ func TestGetLANInterfaceSettingsFalse(t *testing.T) {
 
 func TestGetLocalSystemAccount(t *testing.T) {
 	pthi := NewPTHICommand()
-	err := pthi.heci.Init()
+	err := pthi.heci.Init(&pthi.heci)
 	defer pthi.Close()
 	assert.NoError(t, err)
 	result, err := pthi.GetLocalSystemAccount()
