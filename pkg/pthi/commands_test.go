@@ -10,6 +10,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type MockHECICommands struct {}
+
+func (c MockHECICommands) Init() error { return nil }
+func (c MockHECICommands) GetBufferSize() uint32 { return 4 }
+func (c MockHECICommands) SendMessage(buffer []byte, done *uint32) (bytesWritten uint32, err error) { return 4, nil }
+func (c MockHECICommands) ReceiveMessage(buffer []byte, done *uint32) (bytesRead uint32, err error) { return 4, nil }
+func (c MockHECICommands) Close() {}
+
 func TestGetGUID(t *testing.T) {
 	pthi := NewPTHICommand()
 	err := pthi.heci.Init()
@@ -31,7 +39,7 @@ func TestGetCodeVersions(t *testing.T) {
 	assert.NotEmpty(t, result)
 
 }
-func TestGetDNSSuffixV2(t *testing.T) {
+func TestGetDNSSuffix(t *testing.T) {
 	pthi := NewPTHICommand()
 	err := pthi.heci.Init()
 	defer pthi.Close()

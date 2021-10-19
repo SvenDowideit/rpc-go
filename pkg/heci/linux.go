@@ -24,6 +24,15 @@ type Driver struct {
 	bufferSize uint32
 }
 
+type HECIModel interface {
+	Init() error 
+	GetBufferSize() uint32
+	SendMessage(buffer []byte, done *uint32) (bytesWritten uint32, err error)
+	ReceiveMessage(buffer []byte, done *uint32) (bytesRead uint32, err error)
+	Ioctl(fd, op, arg uintptr) error
+	Close()
+}
+
 const (
 	Device                   = "/dev/mei0"
 	IOCTL_MEI_CONNECT_CLIENT = 0xC0104801

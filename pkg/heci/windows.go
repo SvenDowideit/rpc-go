@@ -32,6 +32,16 @@ type Driver struct {
 	GUID       windows.GUID
 	PTHIGUID   windows.GUID
 }
+
+type HECIModel interface {
+	Init() error 
+	GetBufferSize() uint32
+	SendMessage(buffer []byte, done *uint32) (bytesWritten uint32, err error)
+	ReceiveMessage(buffer []byte, done *uint32) (bytesRead uint32, err error)
+	Ioctl(fd, op, arg uintptr) error
+	Close()
+}
+
 type HeciVersion struct {
 	major  uint8
 	minor  uint8

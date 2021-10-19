@@ -15,7 +15,7 @@ type PTHICommand struct {
 	heci *heci.Driver
 }
 
-type PTHIInfoCommands interface {
+type PTHIModel interface {
 	Open() error
 	Close()
 	Call(command []byte, commandSize uint32) (result []byte, err error)

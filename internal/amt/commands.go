@@ -92,7 +92,7 @@ func ANSI2String(ansi pthi.AMTANSIString) string {
 }
 
 type Command struct {
-	PTHI pthi.PTHIInfoCommands
+	PTHI pthi.PTHIModel
 }
 
 func NewCommand() Command {
