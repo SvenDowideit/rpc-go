@@ -33,15 +33,6 @@ type Driver struct {
 	PTHIGUID   windows.GUID
 }
 
-type HECIModel interface {
-	Init() error 
-	GetBufferSize() uint32
-	SendMessage(buffer []byte, done *uint32) (bytesWritten uint32, err error)
-	ReceiveMessage(buffer []byte, done *uint32) (bytesRead uint32, err error)
-	Ioctl(fd, op, arg uintptr) error
-	Close()
-}
-
 type HeciVersion struct {
 	major  uint8
 	minor  uint8
@@ -51,12 +42,9 @@ type HeciVersion struct {
 type HeciVersionPacked struct {
 	packed [5]byte
 }
-type HeciClient struct {
-	MaxMessageLength uint32
-	ProtocolVersion  uint8
-}
-type HeciClientPacked struct {
-	packed [5]byte
+
+func NewHECICommand() *Driver {
+	return &Driver{}
 }
 
 func (heci *Driver) Init() error {
@@ -165,17 +153,16 @@ func (heci *Driver) GetHeciVersion() error {
 }
 
 func (heci *Driver) ConnectHeciClient() error {
-	properties := HeciClient{}
-	propertiesPacked := HeciClientPacked{}
+	properties := MEIConnectClientData{}
+	propertiesPacked := CMEIConnectClientData{}
 	propertiesSize := unsafe.Sizeof(propertiesPacked)
 	guidSize := unsafe.Sizeof(heci.PTHIGUID)
-	err := heci.doIoctl(ctl_code(FILE_DEVICE_HECI, 0x801, METHOD_BUFFERED, windows.FILE_SHARE_READ|windows.FILE_SHARE_WRITE), (*byte)(unsafe.Pointer(&heci.PTHIGUID)), (uint32)(guidSize), (*byte)(unsafe.Pointer(&propertiesPacked.packed)), (uint32)(propertiesSize))
+	err := heci.doIoctl(ctl_code(FILE_DEVICE_HECI, 0x801, METHOD_BUFFERED, windows.FILE_SHARE_READ|windows.FILE_SHARE_WRITE), (*byte)(unsafe.Pointer(&heci.PTHIGUID)), (uint32)(guidSize), (*byte)(unsafe.Pointer(&propertiesPacked.data)), (uint32)(propertiesSize))
 	if err != nil {
 		return err
 	}
-	buf2 := bytes.NewBuffer(propertiesPacked.packed[:])
-	binary.Read(buf2, binary.LittleEndian, &properties.MaxMessageLength)
-	binary.Read(buf2, binary.LittleEndian, &properties.ProtocolVersion)
+	buf2 := bytes.NewBuffer(propertiesPacked.data[:])
+	binary.Read(buf2, binary.LittleEndian, &properties)
 	heci.bufferSize = properties.MaxMessageLength
 
 	return nil

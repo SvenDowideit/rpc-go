@@ -24,14 +24,6 @@ type Driver struct {
 	bufferSize uint32
 }
 
-type HECIModel interface {
-	Init() error 
-	GetBufferSize() uint32
-	SendMessage(buffer []byte, done *uint32) (bytesWritten uint32, err error)
-	ReceiveMessage(buffer []byte, done *uint32) (bytesRead uint32, err error)
-	Close()
-}
-
 const (
 	Device                   = "/dev/mei0"
 	IOCTL_MEI_CONNECT_CLIENT = 0xC0104801
@@ -42,15 +34,6 @@ var MEI_IAMTHIF = [16]byte{0x28, 0x00, 0xf8, 0x12, 0xb7, 0xb4, 0x2d, 0x4b, 0xac,
 // uint8 == uchar
 type UUID_LE struct {
 	uuid [16]uint8
-}
-
-type MEIConnectClientData struct {
-	MaxMessageLength uint32
-	ProtocolVersion  uint8
-	Reserved         [3]uint8
-}
-type CMEIConnectClientData struct {
-	data [16]byte
 }
 
 func NewHECICommand() *Driver {
