@@ -28,6 +28,8 @@ type Flags struct {
 	SkipCertCheck         bool
 	Verbose               bool
 	SyncClock             bool
+	platformSpec          string
+	lmsAddress            string
 	amtInfoCommand        *flag.FlagSet
 	amtActivateCommand    *flag.FlagSet
 	amtDeactivateCommand  *flag.FlagSet
@@ -100,6 +102,8 @@ func (f *Flags) setupCommonFlags() {
 		fs.BoolVar(&f.SkipCertCheck, "n", false, "skip websocket server certificate verification")
 		fs.StringVar(&f.Proxy, "p", "", "proxy address and port")
 		fs.BoolVar(&f.Verbose, "v", false, "verbose output")
+		fs.StringVar(&f.platformSpec, "pthi", "", "name of file to override host AMT values")
+		fs.StringVar(&f.lmsAddress, "lms", "localhost:16992", "address of lms to use")
 	}
 }
 func (f *Flags) handleMaintenanceCommand() bool {

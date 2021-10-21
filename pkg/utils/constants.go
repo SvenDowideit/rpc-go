@@ -23,7 +23,7 @@ const (
 	// LMSAddress is used for determing what address to connect to LMS on
 	LMSAddress = "localhost"
 	// LMSPort is used for determining what port to connect to LMS on
-	LMSPort = "16992"
+	LMSPort = "5555"
 
 	// MPSServerMaxLength is the max length of the servername
 	MPSServerMaxLength = 256
