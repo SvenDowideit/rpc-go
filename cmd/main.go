@@ -37,6 +37,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	log.SetFormatter(&log.TextFormatter{
+		DisableColors: true,
+		FullTimestamp: true,
+	})
+
 	if flags.Verbose {
 		log.SetLevel(log.TraceLevel)
 	} else {
@@ -45,7 +50,7 @@ func main() {
 
 	//create activation request
 	payload := rps.Payload{
-		AMT: amt.Command{},
+		AMT: amt.NewCommand(),
 	}
 	activationRequest, err := payload.CreateActivationRequest(flags.Command, flags.DNS, flags.Hostname)
 	if err != nil {
