@@ -107,7 +107,7 @@ func (pthi PTHICommand) GetCodeVersions() (GetCodeVersionsResponse, error) {
 }
 
 func (pthi PTHICommand) GetUUID() (uuid string, err error) {
-	commandSize := (uint32)(12) //(uint32)(unsafe.Sizeof(GetUUIDRequest{}))
+	commandSize := (uint32)(12)
 	command := GetUUIDRequest{
 		Header: CreateRequestHeader(GET_UUID_REQUEST, 0),
 	}
