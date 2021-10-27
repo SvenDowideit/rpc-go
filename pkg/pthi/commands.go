@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"rpc/pkg/heci"
 )
 
@@ -23,6 +24,7 @@ type PTHIModel interface {
 	GetUUID() (uuid string, err error)
 	GetControlMode() (state int, err error)
 	GetDNSSuffix() (suffix string, err error)
+	SetDNSSuffix() (suffix string, err error)
 	GetCertificateHashes() (hashEntryList []CertHashEntry, err error)
 	GetRemoteAccessConnectionStatus() (RAStatus GetRemoteAccessConnectionStatusResponse, err error)
 	GetLANInterfaceSettings(useWireless bool) (LANInterface GetLANInterfaceSettingsResponse, err error)
@@ -83,6 +85,36 @@ func CreateRequestHeader(command uint32, length uint32) MessageHeader {
 	}
 }
 
+func (pthi PTHICommand) SetDNSSuffix() (string, error) {
+	commandSize := (uint32)(12)
+	theSuffix := []byte{'h', 'e', 'l', 'l', 'o', '.', 'c', 'o', 'm'}
+
+	command := SetPKIFQDNSuffixRequest{
+		Header: CreateRequestHeader(SET_PKI_FQDN_SUFFIX_REQUEST, 2+9),
+		Suffix: AMTANSIString{
+			Length: 9,
+			Buffer: [1000]uint8{uint8(theSuffix[0]), uint8(theSuffix[1]), uint8(theSuffix[2]), uint8(theSuffix[3]), uint8(theSuffix[4]), uint8(theSuffix[5]), uint8(theSuffix[6]), uint8(theSuffix[7]), uint8(theSuffix[8])},
+		},
+	}
+	var bin_buf bytes.Buffer
+	binary.Write(&bin_buf, binary.LittleEndian, command)
+	result, err := pthi.Call(bin_buf.Bytes(), commandSize)
+	if err != nil {
+		return "", err
+	}
+	buf2 := bytes.NewBuffer(result)
+	response := SetPKIFQDNSuffixResponse{
+		Header: readHeaderResponse(buf2),
+	}
+
+	binary.Read(buf2, binary.LittleEndian, &response.Suffix.Length)
+	binary.Read(buf2, binary.LittleEndian, &response.Suffix.Buffer)
+	fmt.Println(response.Suffix)
+	fmt.Println(response.Header)
+	fmt.Println(response.Header.Status)
+	return "", nil
+}
+
 func (pthi PTHICommand) GetCodeVersions() (GetCodeVersionsResponse, error) {
 	commandSize := (uint32)(12)
 	command := GetUUIDRequest{
@@ -107,7 +139,7 @@ func (pthi PTHICommand) GetCodeVersions() (GetCodeVersionsResponse, error) {
 }
 
 func (pthi PTHICommand) GetUUID() (uuid string, err error) {
-	commandSize := (uint32)(12)
+	commandSize := (uint32)(12) //(uint32)(unsafe.Sizeof(GetUUIDRequest{}))
 	command := GetUUIDRequest{
 		Header: CreateRequestHeader(GET_UUID_REQUEST, 0),
 	}

@@ -76,6 +76,7 @@ type AMTInfoCommands interface {
 	GetControlMode() (int, error)
 	GetOSDNSSuffix() (string, error)
 	GetDNSSuffix() (string, error)
+	SetDNSSuffix() (string, error)
 	GetCertificateHashes() ([]CertHashEntry, error)
 	GetRemoteAccessConnectionStatus() (RemoteAccessStatus, error)
 	GetLANInterfaceSettings(useWireless bool) (InterfaceSettings, error)
@@ -216,7 +217,19 @@ func (amt Command) GetDNSSuffix() (string, error) {
 
 	return result, nil
 }
+func (amt Command) SetDNSSuffix() (string, error) {
+	err := amt.PTHI.Open()
+	if err != nil {
+		return "", nil
+	}
+	defer amt.PTHI.Close()
+	result, err := amt.PTHI.SetDNSSuffix()
+	if err != nil {
+		return "", err
+	}
 
+	return result, nil
+}
 func (amt Command) GetCertificateHashes() ([]CertHashEntry, error) {
 	err := amt.PTHI.Open()
 	amtEntryList := []CertHashEntry{}

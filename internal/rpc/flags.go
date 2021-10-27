@@ -198,6 +198,9 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 			println("Control Mode		: " + string(utils.InterpretControlMode(result)))
 		}
 		if *amtInfoDNSPtr {
+			_, err := amt.SetDNSSuffix()
+			fmt.Println(err)
+			fmt.Println("holyshit")
 			result, _ := amt.GetDNSSuffix()
 			println("DNS Suffix		: " + string(result))
 			result, _ = amt.GetOSDNSSuffix()

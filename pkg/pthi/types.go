@@ -99,6 +99,9 @@ const GET_CERTHASH_ENTRY_RESPONSE = 0x0480002D
 const GET_PKI_FQDN_SUFFIX_REQUEST = 0x04000036
 const GET_PKI_FQDN_SUFFIX_RESPONSE = 0x04800036
 
+const SET_PKI_FQDN_SUFFIX_REQUEST = 0x400002F
+const SET_PKI_FQDN_SUFFIX_RESPONSE = 0x480002F
+
 const SET_HOST_FQDN_REQUEST = 0x0400005b
 const SET_HOST_FQDN_RESPONSE = 0x0480005b
 
@@ -161,6 +164,14 @@ type GetPKIFQDNSuffixRequest struct {
 	Header MessageHeader
 }
 type GetPKIFQDNSuffixResponse struct {
+	Header ResponseMessageHeader
+	Suffix AMTANSIString
+}
+type SetPKIFQDNSuffixRequest struct {
+	Header MessageHeader
+	Suffix AMTANSIString
+}
+type SetPKIFQDNSuffixResponse struct {
 	Header ResponseMessageHeader
 	Suffix AMTANSIString
 }
