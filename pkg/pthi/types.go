@@ -192,7 +192,7 @@ type GetControlModeRequest struct {
 }
 type GetControlModeResponse struct {
 	Header ResponseMessageHeader
-	State  int
+	State  uint32
 }
 type LocalSystemAccount struct {
 	Username [CFG_MAX_ACL_USER_LENGTH]uint8

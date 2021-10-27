@@ -176,8 +176,7 @@ func (pthi PTHICommand) GetControlMode() (state int, err error) {
 	}
 
 	binary.Read(buf2, binary.LittleEndian, &response.State)
-
-	return response.State, nil
+	return int(response.State), nil
 }
 
 func readHeaderResponse(header *bytes.Buffer) ResponseMessageHeader {
