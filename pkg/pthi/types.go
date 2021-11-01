@@ -169,11 +169,14 @@ type GetPKIFQDNSuffixResponse struct {
 }
 type SetPKIFQDNSuffixRequest struct {
 	Header MessageHeader
-	Suffix AMTANSIString
+	Suffix AMTANSIString2
 }
 type SetPKIFQDNSuffixResponse struct {
 	Header ResponseMessageHeader
-	Suffix AMTANSIString
+}
+type AMTANSIString2 struct {
+	Length uint16
+	Buffer [12]uint8
 }
 type AMTANSIString struct {
 	Length uint16

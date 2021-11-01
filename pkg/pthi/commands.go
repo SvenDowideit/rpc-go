@@ -87,13 +87,25 @@ func CreateRequestHeader(command uint32, length uint32) MessageHeader {
 
 func (pthi PTHICommand) SetDNSSuffix() (string, error) {
 	commandSize := (uint32)(12)
-	theSuffix := []byte{'h', 'e', 'l', 'l', 'o', '.', 'c', 'o', 'm'}
-
+	theSuffix := []byte{'v', 'p', 'r', 'o', 'd', 'e', 'm', 'o', '.', 'c', 'o', 'm'}
 	command := SetPKIFQDNSuffixRequest{
-		Header: CreateRequestHeader(SET_PKI_FQDN_SUFFIX_REQUEST, 2+9),
-		Suffix: AMTANSIString{
-			Length: 9,
-			Buffer: [1000]uint8{uint8(theSuffix[0]), uint8(theSuffix[1]), uint8(theSuffix[2]), uint8(theSuffix[3]), uint8(theSuffix[4]), uint8(theSuffix[5]), uint8(theSuffix[6]), uint8(theSuffix[7]), uint8(theSuffix[8])},
+		Header: CreateRequestHeader(SET_PKI_FQDN_SUFFIX_REQUEST, 2+12),
+		Suffix: AMTANSIString2{
+			Length: 12,
+			Buffer: [12]uint8{
+				uint8(theSuffix[0]),
+				uint8(theSuffix[1]),
+				uint8(theSuffix[2]),
+				uint8(theSuffix[3]),
+				uint8(theSuffix[4]),
+				uint8(theSuffix[5]),
+				uint8(theSuffix[6]),
+				uint8(theSuffix[7]),
+				uint8(theSuffix[8]),
+				uint8(theSuffix[9]),
+				uint8(theSuffix[10]),
+				uint8(theSuffix[11]),
+			},
 		},
 	}
 	var bin_buf bytes.Buffer
@@ -107,9 +119,7 @@ func (pthi PTHICommand) SetDNSSuffix() (string, error) {
 		Header: readHeaderResponse(buf2),
 	}
 
-	binary.Read(buf2, binary.LittleEndian, &response.Suffix.Length)
-	binary.Read(buf2, binary.LittleEndian, &response.Suffix.Buffer)
-	fmt.Println(response.Suffix)
+	fmt.Println("HEADER")
 	fmt.Println(response.Header)
 	fmt.Println(response.Header.Status)
 	return "", nil
