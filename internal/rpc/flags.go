@@ -5,6 +5,7 @@
 package rpc
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -33,6 +34,43 @@ type Flags struct {
 	amtDeactivateCommand  *flag.FlagSet
 	amtMaintenanceCommand *flag.FlagSet
 }
+
+// Stores AMTMessage for amtinfo
+type RASMessage struct {
+	Network string `json:"network"`
+	RemoteStatus string `json:"remoteStatus"`
+	Trigger string `json:"trigger"`
+	MPSHostname string `json:"mpsHostname"`
+}
+type LANInterfaceMessage struct {
+	DHCPEnabled string `json:"dhcpEnabled"`
+	DHCPMode string `json:"dhcpMode"`
+	LinkStatus string `json:"linkStatus"`
+	IPAddress string `json:"ipAdress"`
+	MACAddress string `json:"macAddress"`
+}
+type CertificateHashMessage struct {
+	IsDefault bool `json:"isDefault"`
+	IsActive bool `json:"isActive"`
+	Algorithm string `json:"algorithm"`
+	Hash string `json:"hash"`
+}
+type AMTInfoMessage struct {
+	Version string `json:"version"`
+	BuildNumber string `json:"buildNumber"`
+	SKU string `json:"sku"`
+	UUID string `json:"uuid"`
+	ControlMode string `json:"controlMode"`
+	DNSSuffix string `json:"dnsSuffix"`
+	DNSSuffixOS string `json:"dnsSuffixOs"`
+	Hostname string `json:"hostname"`
+	RAS RASMessage `json:"ras"`
+	Wired LANInterfaceMessage `json:"wired"`
+	Wireless LANInterfaceMessage `json:"wireless"`
+	CertificateHashes []CertificateHashMessage `json:"certHashes"`
+}
+
+
 
 func NewFlags(args []string) *Flags {
 	flags := &Flags{}
@@ -208,6 +246,10 @@ func (f *Flags) handleDeactivateCommand() bool {
 	return true
 }
 func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
+	amtInfoJSONPtr := amtInfoCommand.Bool("json", false, "JSON Output")
+	amtInfoMessage := AMTInfoMessage{} 
+	outputMessage := ""
+
 	amtInfoVerPtr := amtInfoCommand.Bool("ver", false, "BIOS Version")
 	amtInfoBldPtr := amtInfoCommand.Bool("bld", false, "Build Number")
 	amtInfoSkuPtr := amtInfoCommand.Bool("sku", false, "Product SKU")
@@ -235,63 +277,80 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 	if amtInfoCommand.Parsed() {
 		amt := amt.Command{}
 		if *amtInfoVerPtr {
-			result, _ := amt.GetVersionDataFromME("AMT")
-			println("Version			: " + result)
+			amtInfoMessage.Version, _ = amt.GetVersionDataFromME("AMT")
+			outputMessage += "Version			: " + amtInfoMessage.Version + "\n"
 		}
 		if *amtInfoBldPtr {
-			result, _ := amt.GetVersionDataFromME("Build Number")
-			println("Build Number		: " + result)
+			amtInfoMessage.BuildNumber, _ = amt.GetVersionDataFromME("Build Number")
+			outputMessage += "Build Number		: " + amtInfoMessage.BuildNumber + "\n"
 		}
 		if *amtInfoSkuPtr {
-			result, _ := amt.GetVersionDataFromME("Sku")
-			println("SKU			: " + result)
+			amtInfoMessage.SKU, _ = amt.GetVersionDataFromME("Sku")
+			outputMessage += "SKU			: " + amtInfoMessage.SKU + "\n"
 		}
 		if *amtInfoUUIDPtr {
-			result, _ := amt.GetUUID()
-			println("UUID			: " + result)
+			amtInfoMessage.UUID, _ = amt.GetUUID()
+			outputMessage += "UUID			: " + amtInfoMessage.UUID + "\n"
 		}
 		if *amtInfoModePtr {
 			result, _ := amt.GetControlMode()
-			println("Control Mode		: " + string(utils.InterpretControlMode(result)))
+			amtInfoMessage.ControlMode = utils.InterpretControlMode(result)
+			outputMessage += "Control Mode		: " + amtInfoMessage.ControlMode + "\n"
 		}
 		if *amtInfoDNSPtr {
-			result, _ := amt.GetDNSSuffix()
-			println("DNS Suffix		: " + string(result))
-			result, _ = amt.GetOSDNSSuffix()
-			fmt.Println("DNS Suffix (OS)		: " + result)
+			amtInfoMessage.DNSSuffix, _ = amt.GetDNSSuffix()
+			outputMessage += "DNS Suffix		: " + amtInfoMessage.DNSSuffix + "\n"
+			amtInfoMessage.DNSSuffixOS, _ = amt.GetOSDNSSuffix()
+			outputMessage += "DNS Suffix (OS)		: " + amtInfoMessage.DNSSuffixOS + "\n"
 		}
 		if *amtInfoHostnamePtr {
-			result, _ := os.Hostname()
-			println("Hostname (OS)		: " + string(result))
+			amtInfoMessage.Hostname, _ = os.Hostname()
+			outputMessage += "Hostname (OS)		: " + amtInfoMessage.Hostname + "\n"
 		}
-
 		if *amtInfoRasPtr {
 			result, _ := amt.GetRemoteAccessConnectionStatus()
-			println("RAS Network      	: " + result.NetworkStatus)
-			println("RAS Remote Status	: " + result.RemoteStatus)
-			println("RAS Trigger      	: " + result.RemoteTrigger)
-			println("RAS MPS Hostname 	: " + result.MPSHostname)
+			amtInfoMessage.RAS.Network = result.NetworkStatus
+			amtInfoMessage.RAS.RemoteStatus = result.RemoteStatus 
+			amtInfoMessage.RAS.Trigger = result.RemoteTrigger
+			amtInfoMessage.RAS.MPSHostname = result.MPSHostname
+			outputMessage += (
+				"RAS Network      	: " + result.NetworkStatus + "\n" +
+				"RAS Remote Status	: " + result.RemoteStatus + "\n" +
+				"RAS Trigger      	: " + result.RemoteTrigger + "\n" +
+				"RAS MPS Hostname 	: " + result.MPSHostname)
 		}
 		if *amtInfoLanPtr {
-			wired, _ := amt.GetLANInterfaceSettings(false)
-			println("---Wired Adapter---")
-			println("DHCP Enabled 		: " + strconv.FormatBool(wired.DHCPEnabled))
-			println("DHCP Mode    		: " + wired.DHCPMode)
-			println("Link Status  		: " + wired.LinkStatus)
-			println("IP Address   		: " + wired.IPAddress)
-			println("MAC Address  		: " + wired.MACAddress)
+			resultWired, _ := amt.GetLANInterfaceSettings(false)
+			amtInfoMessage.Wired.DHCPEnabled = strconv.FormatBool(resultWired.DHCPEnabled)
+			amtInfoMessage.Wired.DHCPMode = resultWired.DHCPMode
+			amtInfoMessage.Wired.LinkStatus = resultWired.LinkStatus
+			amtInfoMessage.Wired.IPAddress = resultWired.IPAddress
+			amtInfoMessage.Wired.MACAddress = resultWired.MACAddress
+			outputMessage += (
+				"---Wired Adapter---" + "\n" +
+				"DHCP Enabled 		: " + strconv.FormatBool(resultWired.DHCPEnabled) + "\n" +
+				"DHCP Mode    		: " + resultWired.DHCPMode + "\n" +
+				"Link Status  		: " + resultWired.LinkStatus + "\n" +
+				"IP Address   		: " + resultWired.IPAddress + "\n" +
+				"MAC Address  		: " + resultWired.MACAddress)
 
-			wireless, _ := amt.GetLANInterfaceSettings(true)
-			println("---Wireless Adapter---")
-			println("DHCP Enabled 		: " + strconv.FormatBool(wireless.DHCPEnabled))
-			println("DHCP Mode    		: " + wireless.DHCPMode)
-			println("Link Status  		: " + wireless.LinkStatus)
-			println("IP Address   		: " + wireless.IPAddress)
-			println("MAC Address  		: " + wireless.MACAddress)
+			resultWireless, _ := amt.GetLANInterfaceSettings(true)
+			amtInfoMessage.Wireless.DHCPEnabled = strconv.FormatBool(resultWireless.DHCPEnabled)
+			amtInfoMessage.Wireless.DHCPMode = resultWireless.DHCPMode
+			amtInfoMessage.Wireless.LinkStatus = resultWireless.LinkStatus
+			amtInfoMessage.Wireless.IPAddress = resultWireless.IPAddress
+			amtInfoMessage.Wireless.MACAddress = resultWireless.MACAddress
+			outputMessage += (
+				"---Wireless Adapter---" + "\n" +
+				"DHCP Enabled 		: " + strconv.FormatBool(resultWireless.DHCPEnabled) + "\n" +
+				"DHCP Mode    		: " + resultWireless.DHCPMode + "\n" +
+				"Link Status  		: " + resultWireless.LinkStatus + "\n" +
+				"IP Address   		: " + resultWireless.IPAddress + "\n" +
+				"MAC Address  		: " + resultWireless.MACAddress)
 		}
 		if *amtInfoCertPtr {
 			result, _ := amt.GetCertificateHashes()
-			println("Certificate Hashes	:")
+			outputMessage += "Certificate Hashes	:"
 			for _, v := range result {
 
 				print(v.Name + " (")
@@ -305,5 +364,10 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 				println("   " + v.Algorithm + ": " + v.Hash)
 			}
 		}
+		if *amtInfoJSONPtr {
+			data, _ := json.MarshalIndent(amtInfoMessage, "", "\t")
+			outputMessage = string(data)
+		}
+		println(outputMessage)
 	}
 }
