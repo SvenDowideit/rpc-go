@@ -317,7 +317,7 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 				"RAS Network      	: " + result.NetworkStatus + "\n" +
 				"RAS Remote Status	: " + result.RemoteStatus + "\n" +
 				"RAS Trigger      	: " + result.RemoteTrigger + "\n" +
-				"RAS MPS Hostname 	: " + result.MPSHostname)
+				"RAS MPS Hostname 	: " + result.MPSHostname + "\n")
 		}
 		if *amtInfoLanPtr {
 			resultWired, _ := amt.GetLANInterfaceSettings(false)
@@ -332,7 +332,7 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 				"DHCP Mode    		: " + resultWired.DHCPMode + "\n" +
 				"Link Status  		: " + resultWired.LinkStatus + "\n" +
 				"IP Address   		: " + resultWired.IPAddress + "\n" +
-				"MAC Address  		: " + resultWired.MACAddress)
+				"MAC Address  		: " + resultWired.MACAddress + "\n")
 
 			resultWireless, _ := amt.GetLANInterfaceSettings(true)
 			amtInfoMessage.Wireless.DHCPEnabled = strconv.FormatBool(resultWireless.DHCPEnabled)
@@ -346,22 +346,21 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 				"DHCP Mode    		: " + resultWireless.DHCPMode + "\n" +
 				"Link Status  		: " + resultWireless.LinkStatus + "\n" +
 				"IP Address   		: " + resultWireless.IPAddress + "\n" +
-				"MAC Address  		: " + resultWireless.MACAddress)
+				"MAC Address  		: " + resultWireless.MACAddress + "\n")
 		}
 		if *amtInfoCertPtr {
 			result, _ := amt.GetCertificateHashes()
-			outputMessage += "Certificate Hashes	:"
+			outputMessage += "Certificate Hashes	:" + "\n"
 			for _, v := range result {
 
-				print(v.Name + " (")
+				outputMessage += v.Name + " ("
 				if v.IsDefault {
-					print("Default,")
+					outputMessage += "Default,"
 				}
 				if v.IsActive {
-					print("Active)")
+					outputMessage += "Active)"
 				}
-				println()
-				println("   " + v.Algorithm + ": " + v.Hash)
+				outputMessage += "\n   " + v.Algorithm + ": " + v.Hash
 			}
 		}
 		if *amtInfoJSONPtr {
