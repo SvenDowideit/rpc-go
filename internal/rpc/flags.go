@@ -55,22 +55,23 @@ type CertificateHashMessage struct {
 	Algorithm string `json:"algorithm"`
 	Hash string `json:"hash"`
 }
+// Pointers are used so that omitempty will ignore 
+// fields the user does not want while still printing 
+// empty values if that is what AMT returns.
 type AMTInfoMessage struct {
-	Version string `json:"version"`
-	BuildNumber string `json:"buildNumber"`
-	SKU string `json:"sku"`
-	UUID string `json:"uuid"`
-	ControlMode string `json:"controlMode"`
-	DNSSuffix string `json:"dnsSuffix"`
-	DNSSuffixOS string `json:"dnsSuffixOs"`
-	Hostname string `json:"hostname"`
-	RAS RASMessage `json:"ras"`
-	Wired LANInterfaceMessage `json:"wired"`
-	Wireless LANInterfaceMessage `json:"wireless"`
-	CertificateHashes []CertificateHashMessage `json:"certHashes"`
+	Version *string `json:"version,omitempty"`
+	BuildNumber *string `json:"buildNumber,omitempty"`
+	SKU *string `json:"sku,omitempty"`
+	UUID *string `json:"uuid,omitempty"`
+	ControlMode *string `json:"controlMode,omitempty"`
+	DNSSuffix *string `json:"dnsSuffix,omitempty"`
+	DNSSuffixOS *string `json:"dnsSuffixOs,omitempty"`
+	Hostname *string `json:"hostname,omitempty"`
+	RAS *RASMessage `json:"ras,omitempty"`
+	Wired *LANInterfaceMessage `json:"wired,omitempty"`
+	Wireless *LANInterfaceMessage `json:"wireless,omitempty"`
+	CertificateHashes *[]CertificateHashMessage `json:"certHashes,omitempty"`
 }
-
-
 
 func NewFlags(args []string) *Flags {
 	flags := &Flags{}
@@ -260,7 +261,9 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 	amtInfoRasPtr := amtInfoCommand.Bool("ras", false, "Remote Access Status")
 	amtInfoLanPtr := amtInfoCommand.Bool("lan", false, "LAN Settings")
 	amtInfoHostnamePtr := amtInfoCommand.Bool("hostname", false, "OS Hostname")
-	if len(f.commandLineArgs) == 2 {
+	amtInfoCommand.Parse(f.commandLineArgs[2:])
+
+	if len(f.commandLineArgs) == 2 || (len(f.commandLineArgs) == 3 && *amtInfoJSONPtr) {
 		*amtInfoVerPtr = true
 		*amtInfoBldPtr = true
 		*amtInfoSkuPtr = true
@@ -272,47 +275,56 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 		*amtInfoLanPtr = true
 		*amtInfoHostnamePtr = true
 	}
-	amtInfoCommand.Parse(f.commandLineArgs[2:])
 
 	if amtInfoCommand.Parsed() {
 		amt := amt.Command{}
 		if *amtInfoVerPtr {
-			amtInfoMessage.Version, _ = amt.GetVersionDataFromME("AMT")
-			outputMessage += "Version			: " + amtInfoMessage.Version + "\n"
+			result, _ := amt.GetVersionDataFromME("AMT")
+			amtInfoMessage.Version = &result
+			outputMessage += "Version			: " + result + "\n"
 		}
 		if *amtInfoBldPtr {
-			amtInfoMessage.BuildNumber, _ = amt.GetVersionDataFromME("Build Number")
-			outputMessage += "Build Number		: " + amtInfoMessage.BuildNumber + "\n"
+			result, _ := amt.GetVersionDataFromME("Build Number")
+			amtInfoMessage.BuildNumber = &result
+			outputMessage += "Build Number		: " + result + "\n"
 		}
 		if *amtInfoSkuPtr {
-			amtInfoMessage.SKU, _ = amt.GetVersionDataFromME("Sku")
-			outputMessage += "SKU			: " + amtInfoMessage.SKU + "\n"
+			result, _ := amt.GetVersionDataFromME("Sku")
+			amtInfoMessage.SKU = &result
+			outputMessage += "SKU			: " + result + "\n"
 		}
 		if *amtInfoUUIDPtr {
-			amtInfoMessage.UUID, _ = amt.GetUUID()
-			outputMessage += "UUID			: " + amtInfoMessage.UUID + "\n"
+			result, _ := amt.GetUUID()
+			amtInfoMessage.UUID = &result
+			outputMessage += "UUID			: " + result + "\n"
 		}
 		if *amtInfoModePtr {
 			result, _ := amt.GetControlMode()
-			amtInfoMessage.ControlMode = utils.InterpretControlMode(result)
-			outputMessage += "Control Mode		: " + amtInfoMessage.ControlMode + "\n"
+			temp := utils.InterpretControlMode(result)
+			amtInfoMessage.ControlMode = &temp
+			outputMessage += "Control Mode		: " + temp + "\n"
 		}
 		if *amtInfoDNSPtr {
-			amtInfoMessage.DNSSuffix, _ = amt.GetDNSSuffix()
-			outputMessage += "DNS Suffix		: " + amtInfoMessage.DNSSuffix + "\n"
-			amtInfoMessage.DNSSuffixOS, _ = amt.GetOSDNSSuffix()
-			outputMessage += "DNS Suffix (OS)		: " + amtInfoMessage.DNSSuffixOS + "\n"
+			result, _ := amt.GetDNSSuffix()
+			amtInfoMessage.DNSSuffix = &result
+			outputMessage += "DNS Suffix		: " + result + "\n"
+			result2, _ := amt.GetOSDNSSuffix()
+			amtInfoMessage.DNSSuffixOS = &result2
+			outputMessage += "DNS Suffix (OS)		: " + result2 + "\n"
 		}
 		if *amtInfoHostnamePtr {
-			amtInfoMessage.Hostname, _ = os.Hostname()
-			outputMessage += "Hostname (OS)		: " + amtInfoMessage.Hostname + "\n"
+			result, _ := os.Hostname()
+			amtInfoMessage.Hostname = &result
+			outputMessage += "Hostname (OS)		: " + result + "\n"
 		}
 		if *amtInfoRasPtr {
 			result, _ := amt.GetRemoteAccessConnectionStatus()
-			amtInfoMessage.RAS.Network = result.NetworkStatus
-			amtInfoMessage.RAS.RemoteStatus = result.RemoteStatus 
-			amtInfoMessage.RAS.Trigger = result.RemoteTrigger
-			amtInfoMessage.RAS.MPSHostname = result.MPSHostname
+			amtInfoMessage.RAS = &RASMessage {
+				Network: result.NetworkStatus,
+				RemoteStatus: result.RemoteStatus,
+				Trigger: result.RemoteTrigger,
+				MPSHostname: result.MPSHostname,
+			}
 			outputMessage += (
 				"RAS Network      	: " + result.NetworkStatus + "\n" +
 				"RAS Remote Status	: " + result.RemoteStatus + "\n" +
@@ -321,11 +333,13 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 		}
 		if *amtInfoLanPtr {
 			resultWired, _ := amt.GetLANInterfaceSettings(false)
-			amtInfoMessage.Wired.DHCPEnabled = strconv.FormatBool(resultWired.DHCPEnabled)
-			amtInfoMessage.Wired.DHCPMode = resultWired.DHCPMode
-			amtInfoMessage.Wired.LinkStatus = resultWired.LinkStatus
-			amtInfoMessage.Wired.IPAddress = resultWired.IPAddress
-			amtInfoMessage.Wired.MACAddress = resultWired.MACAddress
+			amtInfoMessage.Wired = &LANInterfaceMessage {
+				DHCPEnabled: strconv.FormatBool(resultWired.DHCPEnabled),
+				DHCPMode: resultWired.DHCPMode,
+				LinkStatus: resultWired.LinkStatus,
+				IPAddress: resultWired.IPAddress,
+				MACAddress: resultWired.MACAddress,
+			}
 			outputMessage += (
 				"---Wired Adapter---" + "\n" +
 				"DHCP Enabled 		: " + strconv.FormatBool(resultWired.DHCPEnabled) + "\n" +
@@ -335,11 +349,13 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 				"MAC Address  		: " + resultWired.MACAddress + "\n")
 
 			resultWireless, _ := amt.GetLANInterfaceSettings(true)
-			amtInfoMessage.Wireless.DHCPEnabled = strconv.FormatBool(resultWireless.DHCPEnabled)
-			amtInfoMessage.Wireless.DHCPMode = resultWireless.DHCPMode
-			amtInfoMessage.Wireless.LinkStatus = resultWireless.LinkStatus
-			amtInfoMessage.Wireless.IPAddress = resultWireless.IPAddress
-			amtInfoMessage.Wireless.MACAddress = resultWireless.MACAddress
+			amtInfoMessage.Wireless = &LANInterfaceMessage {
+				DHCPEnabled: strconv.FormatBool(resultWireless.DHCPEnabled),
+				DHCPMode: resultWireless.DHCPMode,
+				LinkStatus: resultWireless.LinkStatus,
+				IPAddress: resultWireless.IPAddress,
+				MACAddress: resultWireless.MACAddress,
+			}
 			outputMessage += (
 				"---Wireless Adapter---" + "\n" +
 				"DHCP Enabled 		: " + strconv.FormatBool(resultWireless.DHCPEnabled) + "\n" +
@@ -351,7 +367,14 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 		if *amtInfoCertPtr {
 			result, _ := amt.GetCertificateHashes()
 			outputMessage += "Certificate Hashes	:" + "\n"
+			var hashes []CertificateHashMessage
 			for _, v := range result {
+				hashes = append(hashes, CertificateHashMessage{
+					IsDefault: v.IsDefault,
+					IsActive: v.IsActive,
+					Algorithm: v.Algorithm,
+					Hash: v.Hash,
+				})
 
 				outputMessage += v.Name + " ("
 				if v.IsDefault {
@@ -360,13 +383,14 @@ func (f *Flags) handleAMTInfo(amtInfoCommand *flag.FlagSet) {
 				if v.IsActive {
 					outputMessage += "Active)"
 				}
-				outputMessage += "\n   " + v.Algorithm + ": " + v.Hash
+				outputMessage += "\n   " + v.Algorithm + ": " + v.Hash + "\n"
 			}
+			amtInfoMessage.CertificateHashes = &hashes
 		}
 		if *amtInfoJSONPtr {
 			data, _ := json.MarshalIndent(amtInfoMessage, "", "\t")
-			outputMessage = string(data)
+			outputMessage = string(data) + "\n"
 		}
-		println(outputMessage)
+		print(outputMessage)
 	}
 }
