@@ -120,13 +120,28 @@ const STOP_CONFIGURATION_RESPONSE = 0x480005e
 const GET_UUID_REQUEST = 0x400005c
 const GET_UUID_RESPONSE = 0x480005c
 
+type AMTUnicodeString struct {
+	Length uint16
+	String [UNICODE_STRING_LEN]uint8
+}
+type AMTVersionType struct {
+	Description AMTUnicodeString
+	Version     AMTUnicodeString
+}
+
 type Version struct {
 	MajorNumber uint8
 	MinorNumber uint8
 }
+type CodeVersions struct {
+	BiosVersion   [BIOS_VERSION_LEN]uint8
+	VersionsCount uint32
+	Versions      [VERSIONS_NUMBER]AMTVersionType
+}
+
 type CommandFormat struct {
-	val    uint32
-	fields [3]uint32
+	val uint32
+	// fields [3]uint32
 }
 type MessageHeader struct {
 	Version  Version
@@ -137,6 +152,21 @@ type MessageHeader struct {
 type ResponseMessageHeader struct {
 	Header MessageHeader
 	Status uint32
+}
+type GetCodeVersionsResponse struct {
+	Header      ResponseMessageHeader
+	CodeVersion CodeVersions
+}
+type GetPKIFQDNSuffixRequest struct {
+	Header MessageHeader
+}
+type GetPKIFQDNSuffixResponse struct {
+	Header ResponseMessageHeader
+	Suffix AMTANSIString
+}
+type AMTANSIString struct {
+	Length uint16
+	Buffer [1000]uint8
 }
 type GetUUIDRequest struct {
 	Header MessageHeader
@@ -151,23 +181,21 @@ type GetControlModeRequest struct {
 }
 type GetControlModeResponse struct {
 	Header ResponseMessageHeader
-	State  int
+	State  uint32
 }
 type LocalSystemAccount struct {
 	Username [CFG_MAX_ACL_USER_LENGTH]uint8
 	Password [CFG_MAX_ACL_USER_LENGTH]uint8
-}
-type GetLocalSystemAccountResponse struct {
-	Header  MessageHeader
-	Status  uint32
-	Account LocalSystemAccount
 }
 
 type GetLocalSystemAccountRequest struct {
 	Header   MessageHeader
 	Reserved [40]uint8
 }
-
+type GetLocalSystemAccountResponse struct {
+	Header  ResponseMessageHeader
+	Account LocalSystemAccount
+}
 type GetLANInterfaceSettingsRequest struct {
 	Header         MessageHeader
 	InterfaceIndex uint32
@@ -187,7 +215,17 @@ type AMTHashHandles struct {
 	Length  uint32
 	Handles [CERT_HASH_MAX_NUMBER]uint32
 }
+type CertHashEntry struct {
+	IsDefault       uint32
+	IsActive        uint32
+	CertificateHash [CERT_HASH_MAX_LENGTH]uint8
+	HashAlgorithm   uint8
+	Name            AMTANSIString
+}
 
+type GetHashHandlesRequest struct {
+	Header MessageHeader
+}
 type GetHashHandlesResponse struct {
 	Header      ResponseMessageHeader
 	HashHandles AMTHashHandles
@@ -203,10 +241,14 @@ type GetCertHashEntryResponse struct {
 	Hash   CertHashEntry
 }
 
-type CertHashEntry struct {
-	IsDefault       uint32
-	IsActive        uint32
-	CertificateHash [CERT_HASH_MAX_LENGTH]uint8
-	HashAlgorithm   uint8
-	// Name            AMT_ANSI_STRING
+type GetRemoteAccessConnectionStatusRequest struct {
+	Header MessageHeader
+}
+
+type GetRemoteAccessConnectionStatusResponse struct {
+	Header        ResponseMessageHeader
+	NetworkStatus uint32
+	RemoteStatus  uint32
+	RemoteTrigger uint32
+	MPSHostname   AMTANSIString
 }
