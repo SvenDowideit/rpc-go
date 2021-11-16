@@ -17,39 +17,42 @@ import (
 )
 
 // Mock the AMT Hardware
-type MockCommands struct{}
+type MockAMT struct{}
 
 var mebxDNSSuffix string
 var controlMode int = 0
 
-func (c MockCommands) Initialize() (bool, error) {
+func (c MockAMT) Initialize() (bool, error) {
 	return true, nil
 }
-func (c MockCommands) GetVersionDataFromME(key string) (string, error) { return "Version", nil }
-func (c MockCommands) GetUUID() (string, error)                        { return "123-456-789", nil }
-func (c MockCommands) GetControlMode() (int, error)                    { return 1, nil }
-func (c MockCommands) GetOSDNSSuffix() (string, error)                 { return "osdns", nil }
-func (c MockCommands) GetDNSSuffix() (string, error)                   { return mebxDNSSuffix, nil }
-func (c MockCommands) GetCertificateHashes() ([]amt.CertHashEntry, error) {
+func (c MockAMT) GetVersionDataFromME(key string) (string, error) { return "Version", nil }
+func (c MockAMT) GetUUID() (string, error)                        { return "123-456-789", nil }
+func (c MockAMT) GetUUIDV2() (string, error)                      { return "", nil }
+func (c MockAMT) GetControlMode() (int, error)                    { return controlMode, nil }
+func (c MockAMT) GetControlModeV2() (int, error)                  { return controlMode, nil }
+func (c MockAMT) GetOSDNSSuffix() (string, error)                 { return "osdns", nil }
+func (c MockAMT) GetDNSSuffix() (string, error)                   { return mebxDNSSuffix, nil }
+func (c MockAMT) GetCertificateHashes() ([]amt.CertHashEntry, error) {
 	return []amt.CertHashEntry{}, nil
 }
-func (c MockCommands) GetRemoteAccessConnectionStatus() (amt.RemoteAccessStatus, error) {
+func (c MockAMT) GetRemoteAccessConnectionStatus() (amt.RemoteAccessStatus, error) {
 	return amt.RemoteAccessStatus{}, nil
 }
-func (c MockCommands) GetLANInterfaceSettings(useWireless bool) (amt.InterfaceSettings, error) {
+func (c MockAMT) GetLANInterfaceSettings(useWireless bool) (amt.InterfaceSettings, error) {
 	return amt.InterfaceSettings{}, nil
 }
-func (c MockCommands) GetLocalSystemAccount() (amt.LocalSystemAccount, error) {
+func (c MockAMT) GetLocalSystemAccount() (amt.LocalSystemAccount, error) {
 	return amt.LocalSystemAccount{Username: "Username", Password: "Password"}, nil
 }
 
 var p Payload
 
-func (c MockCommands) InitiateLMS() {}
+func (c MockAMT) InitiateLMS() {}
 
 func init() {
 	p = Payload{}
-	p.AMT = MockCommands{}
+	p.AMT = MockAMT{}
+
 }
 func TestCreatePayload(t *testing.T) {
 	mebxDNSSuffix = "mebxdns"
@@ -60,7 +63,7 @@ func TestCreatePayload(t *testing.T) {
 	assert.Equal(t, "123-456-789", result.UUID)
 	assert.Equal(t, "Username", result.Username)
 	assert.Equal(t, "Password", result.Password)
-	assert.Equal(t, 1, result.CurrentMode)
+	assert.Equal(t, 0, result.CurrentMode)
 	assert.NotEmpty(t, result.Hostname)
 	assert.Equal(t, "mebxdns", result.FQDN)
 	assert.Equal(t, utils.ClientName, result.Client)
@@ -82,7 +85,6 @@ func TestCreatePayloadWithDNSSuffix(t *testing.T) {
 func TestCreateActivationRequestNoDNSSuffix(t *testing.T) {
 	flags := rpc.Flags{
 		Command: "method",
-		Password: "password",
 	}
 	result, err := p.CreateMessageRequest(flags)
 	assert.NoError(t, err)
@@ -147,7 +149,6 @@ func TestCreateActivationRequestWithDNSSuffix(t *testing.T) {
 	flags := rpc.Flags{
 		Command: "method",
 		DNS:     "vprodemo.com",
-		Password: "password",
 	}
 	result, err := p.CreateMessageRequest(flags)
 	assert.NoError(t, err)
